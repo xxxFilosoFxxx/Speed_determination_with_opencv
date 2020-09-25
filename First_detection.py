@@ -21,8 +21,8 @@ def search_peaple(resized_image, ready_out):
 
     for i in range(ready_out.shape[2]):
         confidence = ready_out[0, 0, i, 2]
-        if confidence > 0.2:
-            class_id = int(ready_out[0, 0, i, 1])
+        class_id = int(ready_out[0, 0, i, 1])
+        if confidence > 0.2 and class_id == 15.0:
             x_left_bottom = int(ready_out[0, 0, i, 3] * cols)
             y_left_bottom = int(ready_out[0, 0, i, 4] * rows)
             x_right_top = int(ready_out[0, 0, i, 5] * cols)
@@ -61,7 +61,7 @@ def view_image():
 
 
 if __name__ == '__main__':
-    image = cv2.imread("business-people-walking.jpg")
+    image = cv2.imread("238668340.jpg")
     resize_image, out = blob_image(image)
     search_peaple(resize_image, out)
     view_image()
