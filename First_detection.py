@@ -1,4 +1,5 @@
 from cv2 import cv2
+import os
 
 
 def blob_image(old_image):
@@ -7,7 +8,8 @@ def blob_image(old_image):
     blob = cv2.dnn.blobFromImage(resize_image, 0.01, (300, 300), (127.5, 127.5, 127.5), False)
     print("[INFO] loading model...")
 
-    net = cv2.dnn.readNetFromCaffe("MobileNetSSD_deploy.prototxt", "MobileNetSSD_deploy.caffemodel")
+    net = cv2.dnn.readNetFromCaffe("MobileNetSSD/MobileNetSSD_deploy.prototxt",
+                                   "MobileNetSSD/MobileNetSSD_deploy.caffemodel")
     net.setInput(blob)
     out = net.forward()
     return resize_image, out
@@ -39,7 +41,7 @@ def search_peaple(resized_image, ready_out):
             cv2.rectangle(image, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
                           (0, 255, 0))
 
-            if class_id in class_names:
+            if class_id in class_names:  # TODO: можно убрать, т.к. проверка на условие человека уже соблюдена
                 label = class_names[class_id] + ": " + str(confidence)
                 label_size, base_line = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
@@ -53,16 +55,19 @@ def search_peaple(resized_image, ready_out):
                 print(label)
 
 
-def view_image():
+# def view_image():
     # cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-    cv2.imshow("Image", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow("Image", image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+
+def save_image(new_image):
+    cv2.imwrite("save.jpg", new_image)
 
 
 if __name__ == '__main__':
-    image = cv2.imread("238668340.jpg")
+    image = cv2.imread(os.environ.get('IMAGE', "data_base/business-people-walking.jpg"))
     resize_image, out = blob_image(image)
     search_peaple(resize_image, out)
-    view_image()
-
+    save_image(image)

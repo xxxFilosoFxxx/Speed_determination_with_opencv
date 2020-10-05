@@ -2,6 +2,9 @@
 
 ### The method with the determination of centroids will be used
 
-```First experiment```
+- The whole work plan is presented in the diagram 
+![Image alt](Speed determination diagram.png)
 
+- First experiment - identification of the persons
 ![Image alt](first_detection.jpg)
+
