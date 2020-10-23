@@ -17,4 +17,5 @@ WORKDIR /usr/share/python3
 COPY MobileNetSSD ./MobileNetSSD
 COPY data_base ./data_base
 COPY First_detection.py .
+COPY Detection_frame.py .
 COPY deploy/entrypoint.sh ./entrypoint.sh

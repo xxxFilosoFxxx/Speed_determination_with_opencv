@@ -2,13 +2,13 @@
 
 . venv/bin/activate
 
-read -r -p "Enter image name: " IMAGE
-if [[ "${IMAGE}" == "" ]]
+read -r -p "Enter video name: " VIDEO
+if [[ "${VIDEO}" == "" ]]
 then
-    echo "Error: image not found"
+    echo "Error: video not found"
     exit 1
 fi
 
-export IMAGE="${IMAGE}"
+export VIDEO="${VIDEO}"
 
 python ./First_detection.py
