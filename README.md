@@ -10,3 +10,19 @@
 
 - Second experiment - identifying people in the video and saving each frame to disk
 ![Image alt](test_images/test_frames.jpg)
+
+
+### Deploying
+
+As docker container:
+
+- ```git clone https://github.com/xxxFilosoFxxx/Speed_determination_with_opencv.git```
+- ```cd Speed_determination_with_opencv```
+- ```docker build build -t speed_detection .```
+- ```docker run -it -v ``` (you can forward your base with video) ```--name speed_detection```
+
+Inside the container there is a script ```entrypoint.sh```, use it to process the video.
+
+### Testing
+
+To be continued 
