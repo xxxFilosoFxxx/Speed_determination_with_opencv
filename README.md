@@ -6,4 +6,7 @@
 ![Image alt](Speed_determination_diagram.jpg)
 
 - First experiment - identification of the persons
-![Image alt](first_detection.jpg)
+![Image alt](test_images/first_detection.jpg)
+
+- Second experiment - identifying people in the video and saving each frame to disk
+![Image alt](test_images/test_frames.jpg)
