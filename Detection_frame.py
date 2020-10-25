@@ -44,39 +44,46 @@ class Detection_people:
                 print(label)
 
     def show_video(self):
-        while True:
+        while self.cap.isOpened():
             ret, frame = self.cap.read()
-            frame_resized = cv2.resize(frame, (300, 300))
+            if ret:
+                frame_resized = cv2.resize(frame, (300, 300))
 
-            blob = cv2.dnn.blobFromImage(frame_resized, 0.01, (300, 300), (127.5, 127.5, 127.5), False)
-            self.net.setInput(blob)
-            out = self.net.forward()
+                blob = cv2.dnn.blobFromImage(frame_resized, 0.01, (300, 300), (127.5, 127.5, 127.5), False)
+                self.net.setInput(blob)
+                out = self.net.forward()
 
-            cols = frame_resized.shape[1]
-            rows = frame_resized.shape[0]
+                cols = frame_resized.shape[1]
+                rows = frame_resized.shape[0]
 
-            self.search_peaple(cols, rows, out, frame)
+                self.search_peaple(cols, rows, out, frame)
 
-            cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
-            cv2.imshow("frame", frame)
-            if cv2.waitKey(1) >= 0:  # Break with ESC
+                cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
+                cv2.imshow("frame", frame)
+                if cv2.waitKey(1) >= 0:  # Break with ESC
+                    break
+            else:
                 break
 
-    def save_video(self):  # TODO:
-        while True:
+    def save_frames(self):
+        i = 0
+        while self.cap.isOpened():
             ret, frame = self.cap.read()
-            frame_resized = cv2.resize(frame, (300, 300))
-            out_video = cv2.VideoWriter('first_detection.avi', -1, 20.0, (300, 300))
+            if ret:
+                frame_resized = cv2.resize(frame, (300, 300))
+                out_frame = "data_base/save" + str(i) + ".jpg"
+                i += 1
 
-            blob = cv2.dnn.blobFromImage(frame_resized, 0.01, (300, 300), (127.5, 127.5, 127.5), False)
-            self.net.setInput(blob)
-            out = self.net.forward()
+                blob = cv2.dnn.blobFromImage(frame_resized, 0.01, (300, 300), (127.5, 127.5, 127.5), False)
+                self.net.setInput(blob)
+                out = self.net.forward()
 
-            cols = frame_resized.shape[1]
-            rows = frame_resized.shape[0]
+                cols = frame_resized.shape[1]
+                rows = frame_resized.shape[0]
 
-            self.search_peaple(cols, rows, out, frame)
+                self.search_peaple(cols, rows, out, frame)
 
-            out_video.write(frame)
-            if cv2.waitKey(1) >= 0:  # Break with ESC
+                cv2.imwrite(out_frame, frame)
+
+            else:
                 break
