@@ -66,13 +66,13 @@ class Detection_people:
                 break
 
     def save_frames(self):
-        i = 0
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        ret, frame = self.cap.read()
+        out_video = cv2.VideoWriter('data_base/output.avi', fourcc, 20.0, (frame.shape[1], frame.shape[0]))
         while self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
                 frame_resized = cv2.resize(frame, (300, 300))
-                out_frame = "data_base/save" + str(i) + ".jpg"
-                i += 1
 
                 blob = cv2.dnn.blobFromImage(frame_resized, 0.01, (300, 300), (127.5, 127.5, 127.5), False)
                 self.net.setInput(blob)
@@ -83,7 +83,6 @@ class Detection_people:
 
                 self.search_peaple(cols, rows, out, frame)
 
-                cv2.imwrite(out_frame, frame)
-
+                out_video.write(frame)
             else:
                 break
