@@ -11,7 +11,7 @@ class Detection_people:
                                             "MobileNetSSD/MobileNetSSD_deploy.caffemodel")
         self.class_name = {15: 'person'}
 
-    def search_peaple(self, cols, rows, out, frame):
+    def search_people(self, cols, rows, out, frame):
         for i in range(out.shape[2]):
             confidence = out[0, 0, i, 2]
             class_id = int(out[0, 0, i, 1])
@@ -29,9 +29,16 @@ class Detection_people:
                 x_right_top = int(width_factor * x_right_top)
                 y_right_top = int(height_factor * y_right_top)
 
+                # Здесь будут функции добавления центроидов и обработки скорости
+
+                # Определение контура человека
                 cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
                               (0, 255, 0))
 
+                # Центроид
+                cv2.circle(frame, (int(x_left_bottom + (x_left_bottom / 2)), y_right_top), 5, (0, 0, 255), -1)
+
+                # Лэйбл с % точностью определения человека
                 label = self.class_name[class_id] + ": " + str(confidence)
                 label_size, base_line = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
@@ -56,7 +63,7 @@ class Detection_people:
                 cols = frame_resized.shape[1]
                 rows = frame_resized.shape[0]
 
-                self.search_peaple(cols, rows, out, frame)
+                self.search_people(cols, rows, out, frame)
 
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
                 cv2.imshow("frame", frame)

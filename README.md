@@ -18,7 +18,7 @@ As docker container:
 
 - ```git clone https://github.com/xxxFilosoFxxx/Speed_determination_with_opencv.git```
 - ```cd Speed_determination_with_opencv```
-- ```docker build build -t speed_detection .```
+- ```docker build -t speed_detection .```
 - ```docker run -it -v ~/data_user:/usr/share/python3/data_user --name speed_detection```
 
 Inside the container there is a script ```entrypoint.sh```, use it to process the video.
