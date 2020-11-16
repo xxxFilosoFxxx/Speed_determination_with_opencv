@@ -1,5 +1,5 @@
-from Detection_frame import Detection_people
-from Detection_frame import PATH_VIDEO
+from src.Detection_frame import Detection_people
+from src.Detection_frame import PATH_VIDEO
 
 
 if __name__ == '__main__':
