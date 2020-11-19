@@ -6,10 +6,10 @@
 ![Image alt](Speed_determination_diagram.jpg)
 
 - First experiment - identification of the persons
-![Image alt](tests_detection/first_detection.jpg)
+![Image alt](tests_video_detection/first_detection.jpg)
 
 - Second experiment - identifying people in the video and saving each frame to disk.
-An example of the processed file is located [this](tests_detection/test_frames.avi).
+An example of the processed file is located [this](tests_video_detection/test_frames.avi).
 
 
 ## Deploying

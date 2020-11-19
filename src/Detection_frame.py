@@ -2,7 +2,7 @@ from cv2 import cv2
 from src.Search_speed import Search_speed
 import os
 
-PATH_VIDEO = os.environ.get('VIDEO', 'data_base/Dance.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_base/пример_дневной.mp4')
 
 
 class Detection_people:
@@ -35,8 +35,15 @@ class Detection_people:
                 cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
                               (0, 255, 0))
 
-                # Здесь будут функции добавления центроидов и обработки скорости
-                x_c, y_c = self.centroids.save_centroids(x_left_bottom, y_right_top)
+                # Добавление центроидов
+                x_c, y_c = self.centroids.save_centroids(i, x_left_bottom, x_right_top, y_right_top)
+
+                # Обработка скорости
+                # TODO: self.centroids.search_distance(i) -> возвращает линию между центроидами для данного объекта
+                # Почему-то начальное значение пересчета i стоит 6
+                # distance_x, distance_y = self.centroids.search_distance(i)
+                # if distance_x != 0 and distance_y != 0:
+                #     cv2.line(frame, (int(x_c), int(y_c)), (int(distance_x), int(distance_y)), (0, 0, 255), 2)
 
                 # Центроид
                 cv2.circle(frame, (int(x_c), int(y_c)), 5, (0, 0, 255), -1)
@@ -52,7 +59,7 @@ class Detection_people:
                 cv2.putText(frame, label, (x_left_bottom, y_left_bottom),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
                 # print(label)
-                print(x_c, y_c)
+                # print(x_c, y_c)
 
     def config(self, frame):
         frame_resized = cv2.resize(frame, (300, 300))
@@ -83,7 +90,7 @@ class Detection_people:
     def save_frames(self):
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         ret, frame = self.cap.read()
-        out_video = cv2.VideoWriter('tests_detection/output.avi', fourcc, 20.0, (frame.shape[1], frame.shape[0]))
+        out_video = cv2.VideoWriter('tests_video_detection/output.avi', fourcc, 20.0, (frame.shape[1], frame.shape[0]))
         while self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
