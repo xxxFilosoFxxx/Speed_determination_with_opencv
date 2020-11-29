@@ -1,6 +1,8 @@
+from datetime import datetime
+import os
+
 from cv2 import cv2
 from src.Search_speed import Search_speed
-import os
 
 PATH_VIDEO = os.environ.get('VIDEO', 'data_base/Видеонаблюдение.mp4')
 
@@ -91,9 +93,10 @@ class Detection_people:
                 break
 
     def save_frames(self):
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
         ret, frame = self.cap.read()
-        out_video = cv2.VideoWriter('tests_video_detection/output.avi', fourcc, 25.0, (frame.shape[1], frame.shape[0]))
+        out_video = cv2.VideoWriter('tests_video_detection/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
+                                    fourcc, 25.0, (frame.shape[1], frame.shape[0]))
         while self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
