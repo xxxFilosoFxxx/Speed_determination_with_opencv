@@ -2,8 +2,11 @@
 
 ## The method with the determination of centroids will be used
 
-- The whole work plan is presented in the diagram
-![Image alt](Speed_determination_diagram.jpg)
+- The scheme for determining the speed of a person for a given video file is shown in the diagram
+![Image alt](Scheme_for_determining_the_speed_of_a_person_for_a_given_video_file.png)
+
+- The architecture of the software prototype is shown in the diagram
+![Image alt](Software_prototype_architecture.png)
 
 - First experiment - identification of the persons
 ![Image alt](tests_video_detection/first_detection.jpg)
