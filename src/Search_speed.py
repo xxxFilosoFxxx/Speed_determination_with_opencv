@@ -3,6 +3,7 @@ import math
 
 class Search_speed:
     def __init__(self):
+        self.trackers = list()
         self.centroids = dict()
         self.last_centroids = dict()
 
@@ -20,7 +21,7 @@ class Search_speed:
 
         return self.last_centroids[i][0], self.last_centroids[i][1]
 
-    def search_distance(self, i):
+    def search_speed(self, i):
         if i in self.centroids and i in self.last_centroids:
             d_pixels = math.sqrt(math.pow(self.last_centroids[i][0] - self.centroids[i][0], 2) +
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
