@@ -1,7 +1,7 @@
 import math
 
 
-class Search_speed:
+class SearchSpeed:
     def __init__(self):
         self.trackers = list()
         self.centroids = dict()
@@ -27,7 +27,7 @@ class Search_speed:
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
             ppm = 100  # TODO: стоит определять динамически
             d_meters = d_pixels / ppm
-            fps = 30
+            fps = 25
             speed = d_meters * fps * 3.6
             return speed  # Средняя скорость идущего человека 5-6 км/ч, бег 10-15 км/ч
         else:

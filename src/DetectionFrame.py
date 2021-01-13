@@ -1,22 +1,23 @@
-from datetime import datetime
-import os
+from src.idtracker.CentroidTracker import CentroidTracker
+from src.idtracker.TrackableObject import TrackableObject
+from src.SearchSpeed import SearchSpeed
 from imutils.video import FPS
-
-import dlib
+from datetime import datetime
 from cv2 import cv2
-from src.Search_speed import Search_speed
+import dlib
+import os
 
 PATH_VIDEO = os.environ.get('VIDEO', 'data_base/Тестовый_вариант.mp4')
 
 
-class Detection_people:
+class DetectionPeople:
     def __init__(self, video):
         self.cap = cv2.VideoCapture(video)
         self.net = cv2.dnn.readNetFromCaffe("MobileNetSSD/MobileNetSSD_deploy.prototxt",
                                             "MobileNetSSD/MobileNetSSD_deploy.caffemodel")
         self.class_name = {15: 'person'}
         self.percent = 0.2  # Можно задать аргументом
-        self.centroids = Search_speed()
+        self.centroids = SearchSpeed()
 
     def status_tracking_speed(self, frame):
         for index, tracker in enumerate(self.centroids.trackers):
@@ -123,7 +124,7 @@ class Detection_people:
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('tests_video_detection/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
-                                    fourcc, 30.0, (frame.shape[1], frame.shape[0]))
+                                    fourcc, 25.0, (frame.shape[1], frame.shape[0]))
         while self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
@@ -140,5 +141,3 @@ class Detection_people:
         fps.stop()
         print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
-
-
