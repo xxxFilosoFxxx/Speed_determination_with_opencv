@@ -48,7 +48,7 @@ class DetectionPeople:
                 tracker_id.start_track(frame, rect)
                 # Добавить трекер в наш список трекеров, чтобы мы могли
                 # Использовать его во время пропуска кадров
-                self.centroids.trackers.add(tracker_id)
+                self.centroids.trackers.append(tracker_id)
 
                 # Лэйбл с % точностью определения человека
                 # label = self.class_name[class_id] + ": " + str(confidence)
@@ -109,8 +109,6 @@ class DetectionPeople:
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 255, 0), -1)
 
-        return self.people_count
-
     def config(self, frame_resized):
         blob = cv2.dnn.blobFromImage(frame_resized, 1.0 / 255, (300, 300), 127.5)
         self.net.setInput(blob)
@@ -120,6 +118,15 @@ class DetectionPeople:
         rows = frame_resized.shape[0]
 
         return cols, rows, out
+
+    def statistics_output(self, info, frame):
+        text = "{}".format("INFO VIDEO STREAM")
+        cv2.putText(frame, text, (20, frame.shape[0] - 120),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2, cv2.LINE_AA)
+        for (idx, (row, column)) in enumerate(info):
+            info = "{}: {}".format(row, column)
+            cv2.putText(frame, info, (20, frame.shape[0] - ((idx * 20) + 20)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 1, cv2.LINE_AA)
 
     def show_video(self):
         print("[INFO] starting video stream...")
@@ -137,7 +144,7 @@ class DetectionPeople:
                 else:
                     self.status_tracking_speed(frame)
                 objects = ct.update(self.centroids.rect)
-                people_count = self.counting_object(objects, frame)
+                self.counting_object(objects, frame)
                 self.frame_count += 1
 
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
@@ -171,8 +178,15 @@ class DetectionPeople:
                 else:
                     self.status_tracking_speed(frame)
                 objects = ct.update(self.centroids.rect)
-                people_count = self.counting_object(objects, frame)
-                # print(people_count)
+                self.counting_object(objects, frame)
+
+                info = [
+                    ("Count people", self.people_count),
+                    ("Recognition percentage", self.percent),
+                    ("Recognition object", self.class_name[15])
+                ]
+
+                self.statistics_output(info, frame)
                 self.frame_count += 1
 
                 fps.update()

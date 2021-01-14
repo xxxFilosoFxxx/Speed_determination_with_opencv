@@ -4,7 +4,7 @@ import math
 class SearchSpeed:
     def __init__(self):
         self.rect = list()
-        self.trackers = set()
+        self.trackers = list()
         self.track = dict()
         self.centroids = dict()
         self.last_centroids = dict()
