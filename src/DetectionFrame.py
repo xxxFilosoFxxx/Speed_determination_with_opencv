@@ -17,40 +17,9 @@ class DetectionPeople:
                                             "MobileNetSSD/MobileNetSSD_deploy.caffemodel")
         self.class_name = {15: 'person'}
         self.percent = 0.2  # Можно задать аргументом
+        self.frame_count = 0
+        self.people_count = 0
         self.centroids = SearchSpeed()
-
-    def status_tracking_speed(self, frame):
-        for index, tracker in enumerate(self.centroids.trackers):
-            # Обновить трекер и получить обновленную позицию
-            tracker.update(frame)
-            position = tracker.get_position()
-            # Позиция объекта
-            x_left_bottom, x_right_top = int(position.left()), int(position.right())
-            y_left_bottom, y_right_top = int(position.top()), int(position.bottom())
-            # добавить координаты ограничивающего прямоугольника в список прямоугольников
-            # rect.append((x_left_bottom, y_left_bottom, x_right_top, y_right_top))
-            cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
-                          (0, 255, 0))  # Определение контура человека
-            # Добавление центроидов
-            x_c, y_c = self.centroids.save_centroids(index, x_left_bottom, x_right_top, y_right_top)
-            # Центроид
-            cv2.circle(frame, (int(x_c), int(y_c)), 5, (0, 0, 255), -1)
-
-            speed = self.centroids.search_speed(index)
-            if speed != 0:
-                speed_label = str("%.2f" % speed) + " km/hr"
-                speed_label_size, base_line = cv2.getTextSize(speed_label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-
-                y_left_bottom = max(y_left_bottom, speed_label_size[1])
-                cv2.rectangle(frame, (x_left_bottom, y_left_bottom - speed_label_size[1]),
-                              (x_left_bottom + speed_label_size[0], y_left_bottom + base_line),
-                              (255, 255, 255), cv2.FILLED)
-                # cv2.putText(frame, speed_label, (x_left_bottom, y_left_bottom),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
-                cv2.putText(frame, str(index), (x_left_bottom, y_left_bottom),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
-            print(speed)
-            # print(index)
 
     def search_people(self, cols, rows, out, frame):
         for i in range(0, out.shape[2]):
@@ -81,9 +50,61 @@ class DetectionPeople:
                 self.centroids.trackers.append(tracker_id)
 
                 # Лэйбл с % точностью определения человека
-                label = self.class_name[class_id] + ": " + str(confidence)
-                cv2.putText(frame, label, (x_left_bottom, y_right_top + 15),
+                # label = self.class_name[class_id] + ": " + str(confidence)
+                # cv2.putText(frame, label, (x_left_bottom, y_right_top + 15),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+
+    def status_tracking_speed(self, frame):
+        for index, tracker in enumerate(self.centroids.trackers):
+            # Обновить трекер и получить обновленную позицию
+            tracker.update(frame)
+            position = tracker.get_position()
+            # Позиция объекта
+            x_left_bottom, x_right_top = int(position.left()), int(position.right())
+            y_left_bottom, y_right_top = int(position.top()), int(position.bottom())
+            # добавить координаты ограничивающего прямоугольника в список прямоугольников
+            self.centroids.rect.append((x_left_bottom, y_left_bottom, x_right_top, y_right_top))
+            cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
+                          (0, 255, 0))  # Определение контура человека
+            # Добавление центроидов
+            x_c, y_c = self.centroids.save_centroids(index, x_left_bottom, x_right_top, y_right_top)
+            # Центроид
+            cv2.circle(frame, (int(x_c), int(y_c)), 5, (0, 0, 255), -1)
+
+            speed = self.centroids.search_speed(index)
+            if speed != 0:
+                speed_label = str("%.2f" % speed) + " km/hr"
+                speed_label_size, base_line = cv2.getTextSize(speed_label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+
+                y_left_bottom = max(y_left_bottom, speed_label_size[1])
+                cv2.rectangle(frame, (x_left_bottom, y_left_bottom - speed_label_size[1]),
+                              (x_left_bottom + speed_label_size[0], y_left_bottom + base_line),
+                              (255, 255, 255), cv2.FILLED)
+                cv2.putText(frame, speed_label, (x_left_bottom, y_left_bottom),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+                # cv2.putText(frame, str(index), (x_left_bottom, y_left_bottom),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+            print(speed)
+            # print(index)
+
+    def counting_object_main(self, objects, frame, track, people_count):
+        # цикл по отслеживанию объектов
+        for (object_id, centroid) in objects.items():
+            # проверить, существует ли отслеживаемый объект для текущего
+            # идентификатор объекта
+            add_object = track.get(object_id, None)
+            # если не существует отслеживаемого объекта, создаем его
+
+            if add_object is None:
+                add_object = TrackableObject(object_id, centroid)
+
+            track[object_id] = add_object
+            people_count = int(object_id + 1)
+            cv2.putText(frame, people_count, (centroid[0] - 10, centroid[1] - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 255, 0), -1)
+
+        return people_count
 
     def config(self, frame):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
