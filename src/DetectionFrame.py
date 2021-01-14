@@ -7,7 +7,7 @@ from cv2 import cv2
 import dlib
 import os
 
-PATH_VIDEO = os.environ.get('VIDEO', 'data_base/Видеонаблюдение.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_base/Тестовый_вариант.mp4')
 
 
 class DetectionPeople:
@@ -98,12 +98,16 @@ class DetectionPeople:
 
             if add_object is None:
                 add_object = TrackableObject(object_id, centroid)
+            else:
+                add_object.centroids.append(centroid)
+                if not add_object.counted:  # проверяем, был ли объект подсчитан
+                    add_object.counted = True
 
             self.centroids.track[object_id] = add_object
             self.people_count = int(object_id + 1)
-            # cv2.putText(frame, self.people_count, (centroid[0] - 10, centroid[1] - 10),
-            #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            # cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 255, 0), -1)
+            cv2.putText(frame, str(self.people_count), (centroid[0] - 10, centroid[1] - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 255, 0), -1)
 
         return self.people_count
 
@@ -134,6 +138,7 @@ class DetectionPeople:
                     self.status_tracking_speed(frame)
                 objects = ct.update(self.centroids.rect)
                 people_count = self.counting_object(objects, frame)
+                self.frame_count += 1
 
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
                 cv2.imshow("frame", frame)
@@ -167,7 +172,7 @@ class DetectionPeople:
                     self.status_tracking_speed(frame)
                 objects = ct.update(self.centroids.rect)
                 people_count = self.counting_object(objects, frame)
-                print(people_count)
+                # print(people_count)
                 self.frame_count += 1
 
                 fps.update()
