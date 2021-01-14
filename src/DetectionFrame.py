@@ -7,7 +7,7 @@ from cv2 import cv2
 import dlib
 import os
 
-PATH_VIDEO = os.environ.get('VIDEO', 'data_base/Тестовый_вариант.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_base/Видеонаблюдение.mp4')
 
 
 class DetectionPeople:
@@ -19,6 +19,7 @@ class DetectionPeople:
         self.percent = 0.2  # Можно задать аргументом
         self.frame_count = 0
         self.people_count = 0
+        self.skip_frames = 25
         self.centroids = SearchSpeed()
 
     def search_people(self, cols, rows, out, frame):
@@ -47,7 +48,7 @@ class DetectionPeople:
                 tracker_id.start_track(frame, rect)
                 # Добавить трекер в наш список трекеров, чтобы мы могли
                 # Использовать его во время пропуска кадров
-                self.centroids.trackers.append(tracker_id)
+                self.centroids.trackers.add(tracker_id)
 
                 # Лэйбл с % точностью определения человека
                 # label = self.class_name[class_id] + ": " + str(confidence)
@@ -84,32 +85,29 @@ class DetectionPeople:
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
                 # cv2.putText(frame, str(index), (x_left_bottom, y_left_bottom),
                 #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
-            print(speed)
+            # print(speed)
             # print(index)
 
-    def counting_object_main(self, objects, frame, track, people_count):
+    def counting_object(self, objects, frame):
         # цикл по отслеживанию объектов
         for (object_id, centroid) in objects.items():
             # проверить, существует ли отслеживаемый объект для текущего
             # идентификатор объекта
-            add_object = track.get(object_id, None)
+            add_object = self.centroids.track.get(object_id, None)
             # если не существует отслеживаемого объекта, создаем его
 
             if add_object is None:
                 add_object = TrackableObject(object_id, centroid)
 
-            track[object_id] = add_object
-            people_count = int(object_id + 1)
-            cv2.putText(frame, people_count, (centroid[0] - 10, centroid[1] - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 255, 0), -1)
+            self.centroids.track[object_id] = add_object
+            self.people_count = int(object_id + 1)
+            # cv2.putText(frame, self.people_count, (centroid[0] - 10, centroid[1] - 10),
+            #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            # cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 255, 0), -1)
 
-        return people_count
+        return self.people_count
 
-    def config(self, frame):
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame_resized = cv2.resize(rgb, (300, 300))
-
+    def config(self, frame_resized):
         blob = cv2.dnn.blobFromImage(frame_resized, 1.0 / 255, (300, 300), 127.5)
         self.net.setInput(blob)
         out = self.net.forward()
@@ -117,17 +115,26 @@ class DetectionPeople:
         cols = frame_resized.shape[1]
         rows = frame_resized.shape[0]
 
-        return cols, rows, out, frame
+        return cols, rows, out
 
     def show_video(self):
         print("[INFO] starting video stream...")
         fps = FPS().start()
+        ct = CentroidTracker(maxDisappeared=40, maxDistance=60)
         while self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
-                cols, rows, out, frame = self.config(frame)
-                self.search_people(cols, rows, out, frame)
-                self.status_tracking_speed(frame)
+                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame_resized = cv2.resize(rgb, (300, 300))
+
+                if self.frame_count % self.skip_frames == 0:
+                    cols, rows, out = self.config(frame_resized)
+                    self.search_people(cols, rows, out, frame)
+                else:
+                    self.status_tracking_speed(frame)
+                objects = ct.update(self.centroids.rect)
+                people_count = self.counting_object(objects, frame)
+
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
                 cv2.imshow("frame", frame)
                 if cv2.waitKey(1) >= 0:  # Break with ESC
@@ -142,6 +149,7 @@ class DetectionPeople:
     def save_frames(self):
         print("[INFO] starting save video...")
         fps = FPS().start()
+        ct = CentroidTracker(maxDisappeared=40, maxDistance=60)
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('tests_video_detection/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
@@ -149,11 +157,18 @@ class DetectionPeople:
         while self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
-                if len(self.centroids.trackers) == 0:
-                    cols, rows, out, frame = self.config(frame)
+                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame_resized = cv2.resize(rgb, (300, 300))
+
+                if self.frame_count % self.skip_frames == 0:
+                    cols, rows, out = self.config(frame_resized)
                     self.search_people(cols, rows, out, frame)
                 else:
                     self.status_tracking_speed(frame)
+                objects = ct.update(self.centroids.rect)
+                people_count = self.counting_object(objects, frame)
+                print(people_count)
+                self.frame_count += 1
 
                 fps.update()
                 out_video.write(frame)
