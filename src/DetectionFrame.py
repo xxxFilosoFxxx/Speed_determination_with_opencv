@@ -17,12 +17,12 @@ class DetectionPeople:
                                             "MobileNetSSD/MobileNetSSD_deploy.caffemodel")
         self.class_name = {15: 'person'}
         self.percent = 0.2  # Можно задать аргументом
+        self.centroids = SearchSpeed()
         self.frame_count = 0
         self.people_count = 0
         self.skip_frames = 25
-        self.centroids = SearchSpeed()
 
-    def search_people(self, cols, rows, out, frame):
+    def search_people(self, cols, rows, out, rgb, frame):
         for i in range(0, out.shape[2]):
             confidence = out[0, 0, i, 2]
             class_id = int(out[0, 0, i, 1])
@@ -45,7 +45,7 @@ class DetectionPeople:
                 # Поле координат, а затем запустить корреляцию dlib трекер
                 tracker_id = dlib.correlation_tracker()
                 rect = dlib.rectangle(x_left_bottom, y_left_bottom, x_right_top, y_right_top)
-                tracker_id.start_track(frame, rect)
+                tracker_id.start_track(rgb, rect)
                 # Добавить трекер в наш список трекеров, чтобы мы могли
                 # Использовать его во время пропуска кадров
                 self.centroids.trackers.append(tracker_id)
@@ -55,10 +55,10 @@ class DetectionPeople:
                 # cv2.putText(frame, label, (x_left_bottom, y_right_top + 15),
                 #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
-    def status_tracking_speed(self, frame):
+    def status_tracking_speed(self, rgb, frame):
         for index, tracker in enumerate(self.centroids.trackers):
             # Обновить трекер и получить обновленную позицию
-            tracker.update(frame)
+            tracker.update(rgb)
             position = tracker.get_position()
             # Позиция объекта
             x_left_bottom, x_right_top = int(position.left()), int(position.right())
@@ -105,17 +105,17 @@ class DetectionPeople:
 
             self.centroids.track[object_id] = add_object
             self.people_count = int(object_id + 1)
-            cv2.putText(frame, str(self.people_count), (centroid[0] - 10, centroid[1] - 10),
+            cv2.putText(frame, str(object_id + 1), (centroid[0] - 10, centroid[1] - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 255, 0), -1)
 
-    def config(self, frame_resized):
-        blob = cv2.dnn.blobFromImage(frame_resized, 1.0 / 255, (300, 300), 127.5)
+    def config(self, frame):
+        blob = cv2.dnn.blobFromImage(frame, 1.0 / 255, (300, 300), 127.5)
         self.net.setInput(blob)
         out = self.net.forward()
 
-        cols = frame_resized.shape[1]
-        rows = frame_resized.shape[0]
+        cols = frame.shape[1]
+        rows = frame.shape[0]
 
         return cols, rows, out
 
@@ -140,9 +140,9 @@ class DetectionPeople:
 
                 if self.frame_count % self.skip_frames == 0:
                     cols, rows, out = self.config(frame_resized)
-                    self.search_people(cols, rows, out, frame)
+                    self.search_people(cols, rows, out, rgb, frame)
                 else:
-                    self.status_tracking_speed(frame)
+                    self.status_tracking_speed(rgb, frame)
                 objects = ct.update(self.centroids.rect)
                 self.counting_object(objects, frame)
                 self.frame_count += 1
@@ -161,7 +161,7 @@ class DetectionPeople:
     def save_frames(self):
         print("[INFO] starting save video...")
         fps = FPS().start()
-        ct = CentroidTracker(maxDisappeared=40, maxDistance=60)
+        ct = CentroidTracker(maxDisappeared=10, maxDistance=10)
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('tests_video_detection/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
@@ -170,13 +170,13 @@ class DetectionPeople:
             ret, frame = self.cap.read()
             if ret:
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame_resized = cv2.resize(rgb, (300, 300))
+                frame_resized = cv2.resize(frame, (300, 300))
 
                 if self.frame_count % self.skip_frames == 0:
                     cols, rows, out = self.config(frame_resized)
-                    self.search_people(cols, rows, out, frame)
+                    self.search_people(cols, rows, out, rgb, frame)
                 else:
-                    self.status_tracking_speed(frame)
+                    self.status_tracking_speed(rgb, frame)
                 objects = ct.update(self.centroids.rect)
                 self.counting_object(objects, frame)
 
