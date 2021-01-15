@@ -22,7 +22,7 @@ class DetectionPeople:
         self.people_count = 0
         self.skip_frames = 25
 
-    def search_people(self, cols, rows, out, rgb, frame):
+    def search_people(self, cols, rows, out, rgb, frame, trackers):
         for i in range(0, out.shape[2]):
             confidence = out[0, 0, i, 2]
             class_id = int(out[0, 0, i, 1])
@@ -48,15 +48,15 @@ class DetectionPeople:
                 tracker_id.start_track(rgb, rect)
                 # Добавить трекер в наш список трекеров, чтобы мы могли
                 # Использовать его во время пропуска кадров
-                self.centroids.trackers.append(tracker_id)
+                trackers.append(tracker_id)
 
                 # Лэйбл с % точностью определения человека
                 # label = self.class_name[class_id] + ": " + str(confidence)
                 # cv2.putText(frame, label, (x_left_bottom, y_right_top + 15),
                 #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
-    def status_tracking_speed(self, rect, rgb, frame):
-        for index, tracker in enumerate(self.centroids.trackers):
+    def status_tracking_speed(self, rect, rgb, frame, trackers):
+        for index, tracker in enumerate(trackers):
             # Обновить трекер и получить обновленную позицию
             tracker.update(rgb)
             position = tracker.get_position()
@@ -85,8 +85,6 @@ class DetectionPeople:
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
                 # cv2.putText(frame, str(index), (x_left_bottom, y_left_bottom),
                 #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
-            # print(speed)
-            # print(index)
 
     def counting_object(self, objects, frame):
         # цикл по отслеживанию объектов
@@ -94,8 +92,8 @@ class DetectionPeople:
             # проверить, существует ли отслеживаемый объект для текущего
             # идентификатор объекта
             add_object = self.centroids.track.get(object_id, None)
-            # если не существует отслеживаемого объекта, создаем его
 
+            # если не существует отслеживаемого объекта, создаем его
             if add_object is None:
                 add_object = TrackableObject(object_id, centroid)
             else:
@@ -131,7 +129,8 @@ class DetectionPeople:
     def show_video(self):
         print("[INFO] starting video stream...")
         fps = FPS().start()
-        ct = CentroidTracker(maxDisappeared=40, maxDistance=40)
+        ct = CentroidTracker(maxDisappeared=40, maxDistance=60)
+        trackers = list()
         while self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
@@ -140,10 +139,11 @@ class DetectionPeople:
 
                 rect = list()
                 if self.frame_count % self.skip_frames == 0:
+                    trackers = list()
                     cols, rows, out = self.config(frame_resized)
-                    self.search_people(cols, rows, out, rgb, frame)
+                    self.search_people(cols, rows, out, rgb, frame, trackers)
                 else:
-                    self.status_tracking_speed(rect, rgb, frame)
+                    self.status_tracking_speed(rect, rgb, frame, trackers)
                 objects = ct.update(rect)
                 self.counting_object(objects, frame)
                 self.frame_count += 1
@@ -162,11 +162,12 @@ class DetectionPeople:
     def save_frames(self):
         print("[INFO] starting save video...")
         fps = FPS().start()
-        ct = CentroidTracker(maxDisappeared=40, maxDistance=60)
+        ct = CentroidTracker(maxDisappeared=40, maxDistance=40)
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('tests_video_detection/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
                                     fourcc, 25.0, (frame.shape[1], frame.shape[0]))
+        trackers = list()
         while self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
@@ -175,10 +176,11 @@ class DetectionPeople:
 
                 rect = list()
                 if self.frame_count % self.skip_frames == 0:
+                    trackers = list()
                     cols, rows, out = self.config(frame_resized)
-                    self.search_people(cols, rows, out, rgb, frame)
+                    self.search_people(cols, rows, out, rgb, frame, trackers)
                 else:
-                    self.status_tracking_speed(rect, rgb, frame)
+                    self.status_tracking_speed(rect, rgb, frame, trackers)
                 objects = ct.update(rect)
                 self.counting_object(objects, frame)
 
