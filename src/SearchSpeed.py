@@ -3,7 +3,6 @@ import math
 
 class SearchSpeed:
     def __init__(self):
-        self.rect = list()
         self.trackers = list()
         self.track = dict()
         self.centroids = dict()

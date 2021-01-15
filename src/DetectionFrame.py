@@ -55,7 +55,7 @@ class DetectionPeople:
                 # cv2.putText(frame, label, (x_left_bottom, y_right_top + 15),
                 #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
-    def status_tracking_speed(self, rgb, frame):
+    def status_tracking_speed(self, rect, rgb, frame):
         for index, tracker in enumerate(self.centroids.trackers):
             # Обновить трекер и получить обновленную позицию
             tracker.update(rgb)
@@ -64,7 +64,7 @@ class DetectionPeople:
             x_left_bottom, x_right_top = int(position.left()), int(position.right())
             y_left_bottom, y_right_top = int(position.top()), int(position.bottom())
             # добавить координаты ограничивающего прямоугольника в список прямоугольников
-            self.centroids.rect.append((x_left_bottom, y_left_bottom, x_right_top, y_right_top))
+            rect.append((x_left_bottom, y_left_bottom, x_right_top, y_right_top))
             cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
                           (0, 255, 0))  # Определение контура человека
             # Добавление центроидов
@@ -131,19 +131,20 @@ class DetectionPeople:
     def show_video(self):
         print("[INFO] starting video stream...")
         fps = FPS().start()
-        ct = CentroidTracker(maxDisappeared=40, maxDistance=60)
+        ct = CentroidTracker(maxDisappeared=40, maxDistance=40)
         while self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame_resized = cv2.resize(rgb, (300, 300))
 
+                rect = list()
                 if self.frame_count % self.skip_frames == 0:
                     cols, rows, out = self.config(frame_resized)
                     self.search_people(cols, rows, out, rgb, frame)
                 else:
-                    self.status_tracking_speed(rgb, frame)
-                objects = ct.update(self.centroids.rect)
+                    self.status_tracking_speed(rect, rgb, frame)
+                objects = ct.update(rect)
                 self.counting_object(objects, frame)
                 self.frame_count += 1
 
@@ -161,7 +162,7 @@ class DetectionPeople:
     def save_frames(self):
         print("[INFO] starting save video...")
         fps = FPS().start()
-        ct = CentroidTracker(maxDisappeared=10, maxDistance=10)
+        ct = CentroidTracker(maxDisappeared=40, maxDistance=60)
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('tests_video_detection/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
@@ -172,12 +173,13 @@ class DetectionPeople:
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame_resized = cv2.resize(frame, (300, 300))
 
+                rect = list()
                 if self.frame_count % self.skip_frames == 0:
                     cols, rows, out = self.config(frame_resized)
                     self.search_people(cols, rows, out, rgb, frame)
                 else:
-                    self.status_tracking_speed(rgb, frame)
-                objects = ct.update(self.centroids.rect)
+                    self.status_tracking_speed(rect, rgb, frame)
+                objects = ct.update(rect)
                 self.counting_object(objects, frame)
 
                 info = [
