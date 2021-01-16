@@ -16,11 +16,11 @@ class DetectionPeople:
         self.net = cv2.dnn.readNetFromCaffe("MobileNetSSD/MobileNetSSD_deploy.prototxt",
                                             "MobileNetSSD/MobileNetSSD_deploy.caffemodel")
         self.class_name = {15: 'person'}
-        self.percent = 0.2  # Можно задать аргументом
+        self.percent = 0.2  # TODO: Можно задать аргументом
         self.centroids = SearchSpeed()
         self.frame_count = 0
         self.people_count = 0
-        self.skip_frames = 25
+        self.skip_frames = 30
 
     def search_people(self, cols, rows, out, rgb, frame, trackers):
         for i in range(0, out.shape[2]):
@@ -50,12 +50,8 @@ class DetectionPeople:
                 # Использовать его во время пропуска кадров
                 trackers.append(tracker_id)
 
-                # Лэйбл с % точностью определения человека
-                # label = self.class_name[class_id] + ": " + str(confidence)
-                # cv2.putText(frame, label, (x_left_bottom, y_right_top + 15),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
-
-    def status_tracking_speed(self, rect, rgb, frame, trackers):
+    @staticmethod
+    def status_tracking(rect, rgb, frame, trackers):
         for index, tracker in enumerate(trackers):
             # Обновить трекер и получить обновленную позицию
             tracker.update(rgb)
@@ -67,26 +63,11 @@ class DetectionPeople:
             rect.append((x_left_bottom, y_left_bottom, x_right_top, y_right_top))
             cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
                           (0, 255, 0))  # Определение контура человека
-            # Добавление центроидов
-            x_c, y_c = self.centroids.save_centroids(index, x_left_bottom, x_right_top, y_right_top)
-            # Центроид
-            cv2.circle(frame, (int(x_c), int(y_c)), 5, (0, 0, 255), -1)
 
-            speed = self.centroids.search_speed(index)
-            if speed != 0:
-                speed_label = str("%.2f" % speed) + " km/hr"
-                speed_label_size, base_line = cv2.getTextSize(speed_label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    def counting_and_speed_object(self, objects, frame):
+        # Добавление центроидов в упорядоченный словарь
+        centroids = self.centroids.save_centroids(objects)
 
-                y_left_bottom = max(y_left_bottom, speed_label_size[1])
-                cv2.rectangle(frame, (x_left_bottom, y_left_bottom - speed_label_size[1]),
-                              (x_left_bottom + speed_label_size[0], y_left_bottom + base_line),
-                              (255, 255, 255), cv2.FILLED)
-                cv2.putText(frame, speed_label, (x_left_bottom, y_left_bottom),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
-                # cv2.putText(frame, str(index), (x_left_bottom, y_left_bottom),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
-
-    def counting_object(self, objects, frame):
         # цикл по отслеживанию объектов
         for (object_id, centroid) in objects.items():
             # проверить, существует ли отслеживаемый объект для текущего
@@ -107,6 +88,19 @@ class DetectionPeople:
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 255, 0), -1)
 
+            speed = self.centroids.search_speed(object_id)
+            # print(speed)
+            if speed != 0:
+                speed_label = str("%.2f" % speed) + " km/hr"
+                speed_label_size, base_line = cv2.getTextSize(speed_label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+
+                y_left_bottom = max(centroid[1], speed_label_size[1])
+                cv2.rectangle(frame, (centroid[0], centroid[1] - speed_label_size[1]),
+                              (centroid[0] + speed_label_size[0], y_left_bottom + base_line),
+                              (255, 255, 255), cv2.FILLED)
+                cv2.putText(frame, speed_label, (centroid[0], y_left_bottom),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+
     def config(self, frame):
         blob = cv2.dnn.blobFromImage(frame, 1.0 / 255, (300, 300), 127.5)
         self.net.setInput(blob)
@@ -117,7 +111,8 @@ class DetectionPeople:
 
         return cols, rows, out
 
-    def statistics_output(self, info, frame):
+    @staticmethod
+    def statistics_output(info, frame):
         text = "{}".format("INFO VIDEO STREAM")
         cv2.putText(frame, text, (20, frame.shape[0] - 120),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2, cv2.LINE_AA)
@@ -143,9 +138,9 @@ class DetectionPeople:
                     cols, rows, out = self.config(frame_resized)
                     self.search_people(cols, rows, out, rgb, frame, trackers)
                 else:
-                    self.status_tracking_speed(rect, rgb, frame, trackers)
+                    self.status_tracking(rect, rgb, frame, trackers)
                 objects = ct.update(rect)
-                self.counting_object(objects, frame)
+                self.counting_and_speed_object(objects, frame)
                 self.frame_count += 1
 
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
@@ -162,7 +157,7 @@ class DetectionPeople:
     def save_frames(self):
         print("[INFO] starting save video...")
         fps = FPS().start()
-        ct = CentroidTracker(maxDisappeared=40, maxDistance=40)
+        ct = CentroidTracker(maxDisappeared=50, maxDistance=60)
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('tests_video_detection/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
@@ -180,9 +175,9 @@ class DetectionPeople:
                     cols, rows, out = self.config(frame_resized)
                     self.search_people(cols, rows, out, rgb, frame, trackers)
                 else:
-                    self.status_tracking_speed(rect, rgb, frame, trackers)
+                    self.status_tracking(rect, rgb, frame, trackers)
                 objects = ct.update(rect)
-                self.counting_object(objects, frame)
+                self.counting_and_speed_object(objects, frame)
 
                 info = [
                     ("Count people", self.people_count),

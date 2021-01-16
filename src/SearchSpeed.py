@@ -1,31 +1,32 @@
 import math
+import copy
+from collections import OrderedDict
 
 
 class SearchSpeed:
     def __init__(self):
         self.track = dict()
-        self.centroids = dict()
-        self.last_centroids = dict()
+        self.centroids = OrderedDict()
+        self.last_centroids = OrderedDict()
 
-    def save_centroids(self, i, x_left_bottom, x_right_top, y_right_top) -> (int, int):
-        if i not in self.centroids:
-            self.centroids[i] = [int(x_left_bottom + ((x_right_top - x_left_bottom) / 2)), int(y_right_top)]
-            return self.centroids[i][0], self.centroids[i][1]
+    def save_centroids(self, objects):
+        if len(self.centroids) == 0:
+            self.centroids = copy.deepcopy(objects)
+            return self.centroids
 
-        if i not in self.last_centroids and i in self.centroids:
-            self.last_centroids[i] = [int(x_left_bottom + ((x_right_top - x_left_bottom) / 2)), int(y_right_top)]
-            return self.last_centroids[i][0], self.last_centroids[i][1]
+        if len(self.last_centroids) == 0 and len(self.centroids) != 0:
+            self.last_centroids = copy.deepcopy(objects)
+            return self.last_centroids
 
-        self.centroids[i] = self.last_centroids[i]
-        self.last_centroids[i] = [int(x_left_bottom + ((x_right_top - x_left_bottom) / 2)), int(y_right_top)]
-
-        return self.last_centroids[i][0], self.last_centroids[i][1]
+        self.centroids = copy.deepcopy(self.last_centroids)
+        self.last_centroids = copy.deepcopy(objects)
+        return self.last_centroids
 
     def search_speed(self, i):
         if i in self.centroids and i in self.last_centroids:
             d_pixels = math.sqrt(math.pow(self.last_centroids[i][0] - self.centroids[i][0], 2) +
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
-            ppm = 100  # TODO: стоит определять динамически
+            ppm = 100  # TODO: стоит определять аргументом
             d_meters = d_pixels / ppm
             fps = 25
             speed = d_meters * fps * 3.6
