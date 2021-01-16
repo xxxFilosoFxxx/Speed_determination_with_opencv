@@ -99,6 +99,7 @@ class DetectionPeople:
                               (255, 255, 255), cv2.FILLED)
                 cv2.putText(frame, speed_label, (centroid[0] - 50, y_left_bottom + 100),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+        return centroids
 
     def config(self, frame):
         blob = cv2.dnn.blobFromImage(frame, 1.0 / 255, (300, 300), 127.5)
@@ -176,10 +177,11 @@ class DetectionPeople:
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = ct.update(rect)
-                self.counting_and_speed_object(objects, frame)
+                centroids = self.counting_and_speed_object(objects, frame)
 
                 info = [
                     ("Count people", self.people_count),
+                    ("Number of tracked objects", len(centroids)),
                     ("Recognition percentage", self.percent),
                     ("Recognition object", self.class_name[15])
                 ]
