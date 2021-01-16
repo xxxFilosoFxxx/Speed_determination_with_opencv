@@ -7,7 +7,7 @@ from cv2 import cv2
 import dlib
 import os
 
-PATH_VIDEO = os.environ.get('VIDEO', 'data_base/Тестовый_вариант.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_base/видеонаблюдение.mp4')
 
 
 class DetectionPeople:
@@ -89,16 +89,15 @@ class DetectionPeople:
             cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 255, 0), -1)
 
             speed = self.centroids.search_speed(object_id)
-            # print(speed)
             if speed != 0:
                 speed_label = str("%.2f" % speed) + " km/hr"
                 speed_label_size, base_line = cv2.getTextSize(speed_label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
                 y_left_bottom = max(centroid[1], speed_label_size[1])
-                cv2.rectangle(frame, (centroid[0], centroid[1] - speed_label_size[1]),
-                              (centroid[0] + speed_label_size[0], y_left_bottom + base_line),
+                cv2.rectangle(frame, (centroid[0] - 50, centroid[1] - speed_label_size[1] + 100),
+                              (centroid[0] + speed_label_size[1] + 35, y_left_bottom + base_line + 100),
                               (255, 255, 255), cv2.FILLED)
-                cv2.putText(frame, speed_label, (centroid[0], y_left_bottom),
+                cv2.putText(frame, speed_label, (centroid[0] - 50, y_left_bottom + 100),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
     def config(self, frame):
@@ -157,7 +156,7 @@ class DetectionPeople:
     def save_frames(self):
         print("[INFO] starting save video...")
         fps = FPS().start()
-        ct = CentroidTracker(maxDisappeared=50, maxDistance=60)
+        ct = CentroidTracker(maxDisappeared=40, maxDistance=60)
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('tests_video_detection/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
