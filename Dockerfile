@@ -12,9 +12,10 @@ RUN apt-get update && apt-get install 'ffmpeg' 'libsm6' 'libxext6' -y
 
 COPY --from=builder /usr/share/python3/venv /usr/share/python3/venv
 
-WORKDIR /usr/share/python3
+WORKDIR /home
 
+RUN ["mkdir", "data_user"]
 COPY MobileNetSSD ./MobileNetSSD
-COPY data_base ./data_base
 COPY src/ .
 COPY deploy/entrypoint.sh ./entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]

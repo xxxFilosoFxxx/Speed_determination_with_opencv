@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. venv/bin/activate
+. ../usr/share/python3/venv/bin/activate
 
 read -r -p "Enter video name: " VIDEO
 if [[ "${VIDEO}" == "" ]]
@@ -11,4 +11,4 @@ fi
 
 export VIDEO="${VIDEO}"
 
-python ./First_detection.py
+python ./SaveDetection.py

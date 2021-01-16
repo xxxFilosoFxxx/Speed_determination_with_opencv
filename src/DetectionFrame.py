@@ -65,7 +65,7 @@ class DetectionPeople:
                           (0, 255, 0))  # Определение контура человека
 
     def counting_and_speed_object(self, objects, frame):
-        # Добавление центроидов в упорядоченный словарь
+        # Добавление центроидов в упорядоченный словарь для нахождения скорости
         centroids = self.centroids.save_centroids(objects)
 
         # цикл по отслеживанию объектов
@@ -160,7 +160,7 @@ class DetectionPeople:
         ct = CentroidTracker(maxDisappeared=40, maxDistance=60)
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
         ret, frame = self.cap.read()
-        out_video = cv2.VideoWriter('tests_video_detection/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
+        out_video = cv2.VideoWriter('data_user/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
                                     fourcc, 25.0, (frame.shape[1], frame.shape[0]))
         trackers = list()
         while self.cap.isOpened():
