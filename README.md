@@ -30,14 +30,19 @@ The installation involves downloading the project and building a docker image vi
 - ```cd Speed_determination_with_opencv```
 - ```docker build -t speed_detection .```
 
-You can use one mount for a shared folder with processed videos and videos for processing:
+If you cannot use pre-prepared videos, then use the ```wget``` utility to download videos 
+from the Internet:
+
+- ```mkdir data_user | wget -P "`pwd`/data_user" "YOUR PATH"```
+
+You can use one mount for a shared folder with processed videos and videos for processing: 
 
 - ```docker run --name speed_detection -v "`pwd`/data_user:/home/data_user" -e VIDEO=/home/data_user/video.mp4 speed_detection```
 
 You can use two different mount for the shared folder with processed videos 
 and the shared folder with video for processing:
 
-- ```docker run -v "`pwd`/data_user:/home/data_user" -v "`pwd`/for_search_speed:/home/for_search_speed" -e VIDEO=/home/for_search_speed/video.mp4 speed_detection```
+- ```docker run --name speed_detection -v "`pwd`/data_user:/home/data_user" -v "`pwd`/for_search_speed:/home/for_search_speed" -e VIDEO=/home/for_search_speed/video.mp4 speed_detection```
 
 It is also possible to use 2 environment variables:
  
