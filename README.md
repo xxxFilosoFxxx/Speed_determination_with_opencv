@@ -32,12 +32,12 @@ The installation involves downloading the project and building a docker image vi
 
 You can use one mount for a shared folder with processed videos and videos for processing:
 
-- ```docker run --name speed_detection -v "$(PWD)/data_user:/home/data_user" -e VIDEO=/home/data_user/video.mp4 speed_detection```
+- ```docker run --name speed_detection -v "`pwd`/data_user:/home/data_user" -e VIDEO=/home/data_user/video.mp4 speed_detection```
 
 You can use two different mount for the shared folder with processed videos 
 and the shared folder with video for processing:
 
-- ```docker run -v "$(PWD)/data_user:/home/data_user" -v "$(PWD)/for_search_speed:/home/for_search_speed" -e VIDEO=/home/for_search_speed/video.mp4 speed_detection```
+- ```docker run -v "`pwd`/data_user:/home/data_user" -v "`pwd`/for_search_speed:/home/for_search_speed" -e VIDEO=/home/for_search_speed/video.mp4 speed_detection```
 
 It is also possible to use 2 environment variables:
  
