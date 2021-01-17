@@ -3,7 +3,7 @@ import copy
 from collections import OrderedDict
 import os
 
-PPM = os.environ.get('PPM', 100)  # Изначально планировалось как угол наклона камеры
+TILT = os.environ.get('TILT', 50)  # Изначально планировалось как угол наклона камеры
 
 
 class SearchSpeed:
@@ -29,7 +29,7 @@ class SearchSpeed:
         if i in self.centroids and i in self.last_centroids:
             d_pixels = math.sqrt(math.pow(self.last_centroids[i][0] - self.centroids[i][0], 2) +
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
-            ppm = PPM
+            ppm = TILT * 2
             d_meters = d_pixels / ppm
             fps = 25
             speed = d_meters * fps * 3.6
