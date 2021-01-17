@@ -1,5 +1,7 @@
 FROM snakepacker/python:all as builder
 
+RUN apt-get update && apt-get install 'cmake' -y
+
 COPY requirements.txt /mnt/
 
 RUN python3.7 -m venv /usr/share/python3/venv && \
@@ -8,7 +10,7 @@ RUN python3.7 -m venv /usr/share/python3/venv && \
 
 FROM snakepacker/python:3.7 as base
 
-RUN apt-get update && apt-get install 'ffmpeg' 'libsm6' 'libxext6' -y
+RUN apt-get update && apt-get install 'ffmpeg' 'libsm6' 'libxext6' 'cmake' -y
 
 COPY --from=builder /usr/share/python3/venv /usr/share/python3/venv
 
@@ -16,6 +18,7 @@ WORKDIR /home
 
 RUN ["mkdir", "data_user"]
 COPY MobileNetSSD ./MobileNetSSD
-COPY src/ .
+COPY src ./src
+COPY SaveDetection.py ./SaveDetection.py
 COPY deploy/entrypoint.sh ./entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]

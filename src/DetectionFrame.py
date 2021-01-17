@@ -7,7 +7,8 @@ from cv2 import cv2
 import dlib
 import os
 
-PATH_VIDEO = os.environ.get('VIDEO', 'data_base/видеонаблюдение.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')  # Путь к обрабатываемому видео
+PERCENT = os.environ.get('PERCENT', 0.2)  # процент распознавания
 
 
 class DetectionPeople:
@@ -16,7 +17,7 @@ class DetectionPeople:
         self.net = cv2.dnn.readNetFromCaffe("MobileNetSSD/MobileNetSSD_deploy.prototxt",
                                             "MobileNetSSD/MobileNetSSD_deploy.caffemodel")
         self.class_name = {15: 'person'}
-        self.percent = 0.2  # TODO: Можно задать аргументом
+        self.percent = PERCENT
         self.centroids = SearchSpeed()
         self.frame_count = 0
         self.people_count = 0
@@ -159,6 +160,9 @@ class DetectionPeople:
         fps = FPS().start()
         ct = CentroidTracker(maxDisappeared=40, maxDistance=60)
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+        if not self.cap.isOpened():
+            print("[INFO] video is not saved")
+            return -1
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('data_user/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M"),
                                     fourcc, 25.0, (frame.shape[1], frame.shape[0]))
