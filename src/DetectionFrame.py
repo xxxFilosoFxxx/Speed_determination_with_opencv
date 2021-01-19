@@ -86,8 +86,8 @@ class DetectionPeople:
             self.centroids.track[object_id] = add_object
             self.people_count = int(object_id + 1)
             cv2.putText(frame, str(object_id + 1), (centroid[0] - 10, centroid[1] - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 255, 0), -1)
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 0, 255), -1)
 
             speed = self.centroids.search_speed(object_id)
             if speed != 0:
@@ -95,10 +95,10 @@ class DetectionPeople:
                 speed_label_size, base_line = cv2.getTextSize(speed_label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
                 y_left_bottom = max(centroid[1], speed_label_size[1])
-                cv2.rectangle(frame, (centroid[0] - 50, centroid[1] - speed_label_size[1] + 100),
-                              (centroid[0] + speed_label_size[1] + 35, y_left_bottom + base_line + 100),
+                cv2.rectangle(frame, (centroid[0] + 50, centroid[1] - speed_label_size[1] - 100),
+                              (centroid[0] - speed_label_size[1] - 35, y_left_bottom + base_line - 100),
                               (255, 255, 255), cv2.FILLED)
-                cv2.putText(frame, speed_label, (centroid[0] - 50, y_left_bottom + 100),
+                cv2.putText(frame, speed_label, (centroid[0] - 50, y_left_bottom - 100),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
         return centroids
 
@@ -184,7 +184,6 @@ class DetectionPeople:
                 centroids = self.counting_and_speed_object(objects, frame)
 
                 info = [
-                    ("Count people", self.people_count),
                     ("Number of tracked objects", len(centroids)),
                     ("Recognition percentage", self.percent),
                     ("Recognition object", self.class_name[15])

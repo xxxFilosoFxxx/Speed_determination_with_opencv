@@ -48,7 +48,7 @@ It is also possible to use 2 environment variables:
  
 - Recognition percentage -> ```PERCENT```
 
-- Camera tilt angle -> ```TILT```
+- Pixel per meter -> ```PPM```
 
 ## Testing
 
