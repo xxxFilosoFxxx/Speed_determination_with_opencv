@@ -37,12 +37,12 @@ from the Internet:
 
 You can use one mount for a shared folder with processed videos and videos for processing: 
 
-- ```docker run --name speed_detection -v "`pwd`/data_user:/home/data_user" -e VIDEO=/home/data_user/video.mp4 speed_detection```
+- ```docker run --name speed_detection -v "`pwd`"/data_user:/home/data_user -e VIDEO=/home/data_user/video.mp4 speed_detection```
 
 You can use two different mount for the shared folder with processed videos 
 and the shared folder with video for processing:
 
-- ```docker run --name speed_detection -v "`pwd`/data_user:/home/data_user" -v "`pwd`/for_search_speed:/home/for_search_speed" -e VIDEO=/home/for_search_speed/video.mp4 speed_detection```
+- ```docker run --name speed_detection -v "`pwd`"/data_user:/home/data_user -v "`pwd`"/for_search_speed:/home/for_search_speed -e VIDEO=/home/for_search_speed/video.mp4 speed_detection```
 
 It is also possible to use 2 environment variables:
  
@@ -52,4 +52,28 @@ It is also possible to use 2 environment variables:
 
 ## Testing
 
-To be continued 
+Run all tests with coverage by running (venv must be activated):
+
+- ```coverage run -m unittest```
+
+```
+Name                                Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------
+src/detection_frame.py                148     16    89%   173-191
+src/idtracker/centroid_tracker.py      60      1    98%   59
+src/idtracker/trackable_object.py       5      0   100%
+src/search_speed.py                    30      0   100%
+-----------------------------------------------------------------
+TOTAL                                 243     17    93%
+```
+
+For detailed report run:
+
+- coverage report
+- coverage html
+
+## Code inspection
+
+For src and tests: ```pylint src tests```
+
+- ```Your code has been rated at 10.00/10 (previous run: 10.00/10)```

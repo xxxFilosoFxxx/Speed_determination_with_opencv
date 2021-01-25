@@ -19,6 +19,6 @@ WORKDIR /home
 RUN ["mkdir", "data_user"]
 COPY MobileNetSSD ./MobileNetSSD
 COPY src ./src
-COPY SaveDetection.py ./SaveDetection.py
+COPY save_detection.py ./SaveDetection.py
 COPY deploy/entrypoint.sh ./entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]
