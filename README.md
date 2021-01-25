@@ -76,4 +76,4 @@ For detailed report run:
 
 For src and tests: ```pylint src tests```
 
-- ```Your code has been rated at 10.00/10 (previous run: 10.00/10)```
+- ```Your code has been rated at 10.00/10```
