@@ -164,7 +164,7 @@ class DetectionPeople:
         fps = FPS().start()
         centroid_tracker = CentroidTracker(maxDisappeared=40, maxDistance=60)
         if not self.cap.isOpened():
-            print("[INFO] video is not saved")
+            print("[INFO] failed to process video")
             return -1
         trackers = list()
         while self.cap.isOpened():
@@ -190,7 +190,6 @@ class DetectionPeople:
                     break
                 fps.update()
             else:
-                print("[INFO] failed to process video")
                 break
         fps.stop()
         print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
@@ -205,7 +204,7 @@ class DetectionPeople:
         centroid_tracker = CentroidTracker(maxDisappeared=40, maxDistance=60)
         fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
         if not self.cap.isOpened():
-            print("[INFO] video is not saved")
+            print("[INFO] failed to process video")
             return -1
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('data_user/output: %r.avi'
@@ -240,7 +239,6 @@ class DetectionPeople:
                 fps.update()
                 out_video.write(frame)
             else:
-                print("[INFO] failed to process video")
                 break
         fps.stop()
         print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
