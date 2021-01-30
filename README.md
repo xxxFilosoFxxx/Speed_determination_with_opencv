@@ -9,14 +9,14 @@
 ![Image alt](Software_prototype_architecture.png)
 
 - First experiment - identification of the persons
-![Image alt](tests_video_detection/first_detection.jpg)
+![Image alt](video_detection_tests/first_detection.jpg)
 
 - Second experiment - identifying people in the video and saving each frame to disk.
-An example of the processed file is located [this](tests_video_detection/test_frames.avi).
+An example of the processed file is located [this](video_detection_tests/test_frames.avi).
 
 - Third experiment - the prototype of the software tool processes the video and dynamically
 finds the speed of the given objects. 
-An example of the processed file is located [this](tests_video_detection/output.avi).
+An example of the processed file is located [this](video_detection_tests/output.avi).
 
 ## Installation
 
