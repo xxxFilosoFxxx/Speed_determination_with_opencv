@@ -2,9 +2,6 @@
 
 ## The method with the determination of centroids will be used
 
-- The scheme for determining the speed of a person for a given video file is shown in the diagram
-![Image alt](Scheme_for_determining_the_speed_of_a_person_for_a_given_video_file.png)
-
 - The architecture of the software prototype is shown in the diagram
 ![Image alt](Software_prototype_architecture.png)
 
@@ -16,7 +13,7 @@ An example of the processed file is located [this](video_detection_tests/test_fr
 
 - Third experiment - the prototype of the software tool processes the video and dynamically
 finds the speed of the given objects. 
-An example of the processed file is located [this](video_detection_tests/output.avi).
+An example of the processed file is located [this](video_detection_tests/output:01-02-2021_05:34.avi).
 
 ## Installation
 
@@ -57,14 +54,14 @@ Run all tests with coverage by running (venv must be activated):
 - ```coverage run -m unittest```
 
 ```
-Name                                Stmts   Miss  Cover   Missing
------------------------------------------------------------------
-src/detection_frame.py                148     16    89%   173-191
-src/idtracker/centroid_tracker.py      60      1    98%   59
+Name                                Stmts   Miss  Cover
+-------------------------------------------------------
+src/detection_frame.py                152      1    99%
+src/idtracker/centroid_tracker.py      60      1    98%
 src/idtracker/trackable_object.py       5      0   100%
 src/search_speed.py                    30      0   100%
------------------------------------------------------------------
-TOTAL                                 243     17    93%
+-------------------------------------------------------
+TOTAL                                 247      2    99%
 ```
 
 For detailed report run:

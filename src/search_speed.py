@@ -28,11 +28,11 @@ class SearchSpeed:
         Returns:
             копии (копию) упорядоченного словаря
         """
-        if len(self.centroids) == 0:
+        if not self.centroids:
             self.centroids = copy.deepcopy(objects)
             return self.centroids
 
-        if len(self.last_centroids) == 0 and len(self.centroids) != 0:
+        if not self.last_centroids and self.centroids:
             self.last_centroids = copy.deepcopy(objects)
             return self.last_centroids
 
@@ -52,9 +52,9 @@ class SearchSpeed:
         if i in self.centroids and i in self.last_centroids:
             d_pixels = math.sqrt(math.pow(self.last_centroids[i][0] - self.centroids[i][0], 2) +
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
-            ppm = PPM * 2
+            ppm = PPM * 4
             d_meters = d_pixels / ppm
-            fps = 25
+            fps = 30
             speed = d_meters * fps * 3.6
             return speed  # Средняя скорость идущего человека 5-6 км/ч, бег 10-15 км/ч
         else:

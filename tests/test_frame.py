@@ -34,9 +34,9 @@ class TestFrame(unittest.TestCase):
 
         d_pixels = math.sqrt(math.pow(last_centroids[0][0] - centroids[0][0], 2) +
                              math.pow(last_centroids[0][1] - centroids[0][1], 2))
-        ppm = PPM * 2
+        ppm = PPM * 4
         d_meters = d_pixels / ppm
-        fps = 25
+        fps = 30
         speed = d_meters * fps * 3.6
         self.assertEqual(test_speed, speed)
 
@@ -46,13 +46,20 @@ class TestFrame(unittest.TestCase):
         zero_speed = test_class_speed.search_speed(1)
         self.assertEqual(zero_speed, 0)
 
-    def test_full_search(self):
+    def test_full_search_show(self):
         """
         Тест на сохранение и обработку итогового видеофайла
         """
-        people = DetectionPeople('data_base/парковка.mp4')
+        people = DetectionPeople('data_user/парковка.mp4')
         self.assertTrue(people.cap.isOpened())
         self.assertEqual(people.save_frames(), 0)
+
+    def test_full_search_save(self):
+        """
+        Тест на обработку вывод на экран итогового видеофайла
+        """
+        people = DetectionPeople('data_user/парковка.mp4')
+        self.assertTrue(people.cap.isOpened())
         self.assertEqual(people.show_video(), 0)
 
     def test_video(self):

@@ -13,7 +13,7 @@ from src.idtracker.trackable_object import TrackableObject
 from src.search_speed import SearchSpeed
 
 # Путь к обрабатываемому видео
-PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_user/Пример_записи_1080.mp4')
 # процент распознавания
 PERCENT = os.environ.get('PERCENT', 0.2)
 
@@ -94,7 +94,7 @@ class DetectionPeople:
         centroids = self.centroids.save_centroids(objects)
 
         # цикл по отслеживанию объектов
-        for (object_id, centroid) in objects.items():
+        for (idx, (object_id, centroid)) in enumerate(objects.items()):
             # проверить, существует ли отслеживаемый объект для текущего
             # идентификатор объекта
             add_object = self.centroids.track.get(object_id, None)
@@ -127,6 +127,9 @@ class DetectionPeople:
                               (255, 255, 255), cv2.FILLED)
                 cv2.putText(frame, speed_label, (centroid[0] - 50, y_left_bottom - 100),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+                info = "ID {}: {}".format(int(object_id + 1), speed_label)
+                cv2.putText(frame, info, (400, frame.shape[0] - ((idx * 20) + 20)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 1, cv2.LINE_AA)
         return centroids
 
     def config(self, frame):
@@ -194,6 +197,8 @@ class DetectionPeople:
         fps.stop()
         print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+        self.cap.release()
+        cv2.destroyAllWindows()
         return 0
 
     def save_frames(self):
@@ -201,15 +206,15 @@ class DetectionPeople:
         Функция сохраняет файл после обработки
         """
         fps = FPS().start()
-        centroid_tracker = CentroidTracker(maxDisappeared=40, maxDistance=60)
-        fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+        centroid_tracker = CentroidTracker(maxDisappeared=40, maxDistance=120)
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
             return -1
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('data_user/output: %r.avi'
                                     % datetime.now().strftime("%d-%m-%Y %H:%M"),
-                                    fourcc, 25.0, (frame.shape[1], frame.shape[0]))
+                                    fourcc, 30.0, (frame.shape[1], frame.shape[0]))
         trackers = list()
         while self.cap.isOpened():
             ret, frame = self.cap.read()
@@ -243,4 +248,6 @@ class DetectionPeople:
         fps.stop()
         print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+        self.cap.release()
+        out_video.release()
         return 0
