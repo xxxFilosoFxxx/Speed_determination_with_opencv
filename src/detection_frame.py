@@ -128,8 +128,8 @@ class DetectionPeople:
                 cv2.putText(frame, speed_label, (centroid[0] - 50, y_left_bottom - 100),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
                 info = "ID {}: {}".format(int(object_id + 1), speed_label)
-                cv2.putText(frame, info, (400, frame.shape[0] - ((idx * 20) + 20)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 1, cv2.LINE_AA)
+                cv2.putText(frame, info, (700, frame.shape[0] - ((idx * 50) + 50)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 0), 1, cv2.LINE_AA)
         return centroids
 
     def config(self, frame):
@@ -152,12 +152,12 @@ class DetectionPeople:
         заданную информацию в видеофайл
         """
         text = "{}".format("INFO VIDEO STREAM")
-        cv2.putText(frame, text, (20, frame.shape[0] - 120),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2, cv2.LINE_AA)
+        cv2.putText(frame, text, (20, frame.shape[0] - 240),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 0), 2, cv2.LINE_AA)
         for (idx, (row, column)) in enumerate(info):
             info = "{}: {}".format(row, column)
-            cv2.putText(frame, info, (20, frame.shape[0] - ((idx * 20) + 20)),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 1, cv2.LINE_AA)
+            cv2.putText(frame, info, (20, frame.shape[0] - ((idx * 50) + 50)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 0), 1, cv2.LINE_AA)
 
     def show_video(self):
         """
