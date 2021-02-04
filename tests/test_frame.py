@@ -30,7 +30,7 @@ class TestFrame(unittest.TestCase):
         last_centroids = test_class_speed.save_centroids(test_dict)
         self.assertEqual(last_centroids, test_dict)
 
-        test_speed = test_class_speed.search_speed(0)
+        test_speed = test_class_speed.search_speed(30, 0)
 
         d_pixels = math.sqrt(math.pow(last_centroids[0][0] - centroids[0][0], 2) +
                              math.pow(last_centroids[0][1] - centroids[0][1], 2))
@@ -43,7 +43,7 @@ class TestFrame(unittest.TestCase):
         update_last_centroids = test_class_speed.save_centroids(test_dict)
         self.assertEqual(update_last_centroids, test_dict)
 
-        zero_speed = test_class_speed.search_speed(1)
+        zero_speed = test_class_speed.search_speed(30, 1)
         self.assertEqual(zero_speed, 0)
 
     def test_full_search_show(self):

@@ -71,4 +71,5 @@ class SearchSpeed:
             speed: скорость объекта
         """
         with open("test_result.txt", "a") as file:
-            file.write("timestamp {}: ID {}: speed {:.2f}\n".format(int(timestamp), object_id + 1, speed))
+            file.write("timestamp {}: ID {}: speed {:.2f}\n".format(int(timestamp),
+                                                                    object_id + 1, speed))
