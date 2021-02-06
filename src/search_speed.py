@@ -8,7 +8,7 @@ import math
 import copy
 import os
 
-PPM = os.environ.get('PPM', 50)  # пиксель на метр
+PPM = os.environ.get('PPM', 25)  # пиксель на метр
 
 
 class SearchSpeed:
@@ -53,7 +53,7 @@ class SearchSpeed:
         if i in self.centroids and i in self.last_centroids:
             d_pixels = math.sqrt(math.pow(self.last_centroids[i][0] - self.centroids[i][0], 2) +
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
-            ppm = PPM * 4
+            ppm = PPM
             d_meters = d_pixels / ppm
             fps = skip_frames
             speed = d_meters * fps * 3.6
@@ -71,5 +71,5 @@ class SearchSpeed:
             speed: скорость объекта
         """
         with open("test_result.txt", "a") as file:
-            file.write("timestamp {}: ID {}: speed {:.2f}\n".format(int(timestamp),
-                                                                    object_id + 1, speed))
+            file.write("timestamp {}: ID {}: speed {:.2f}\n"
+                       .format(int(timestamp), object_id + 1, speed))

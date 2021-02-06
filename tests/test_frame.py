@@ -34,7 +34,7 @@ class TestFrame(unittest.TestCase):
 
         d_pixels = math.sqrt(math.pow(last_centroids[0][0] - centroids[0][0], 2) +
                              math.pow(last_centroids[0][1] - centroids[0][1], 2))
-        ppm = PPM * 4
+        ppm = PPM
         d_meters = d_pixels / ppm
         fps = 30
         speed = d_meters * fps * 3.6
