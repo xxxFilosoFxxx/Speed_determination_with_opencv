@@ -41,10 +41,12 @@ class SearchSpeed:
         self.last_centroids = copy.deepcopy(objects)
         return self.last_centroids
 
-    def search_speed(self, skip_frames, i):
+    def search_speed(self, width, height, skip_frames, i):
         """
             Основаня функция для поиска скорости объекта
         Args:
+            width:
+            height:
             skip_frames: частота кадров в секунду на видео
             i: идентификатор объекта
 
@@ -54,7 +56,8 @@ class SearchSpeed:
         if i in self.centroids and i in self.last_centroids:
             d_pixels = math.sqrt(math.pow(self.last_centroids[i][0] - self.centroids[i][0], 2) +
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
-            ppm = PPM
+            ppm = PPM  # узнать через высоту камеры
+            print(i, ppm)
             d_meters = d_pixels / ppm
             fps = skip_frames
             speed = d_meters * fps * 3.6
@@ -62,8 +65,8 @@ class SearchSpeed:
         else:
             return 0
 
-    def search_delta_speed(self, skip_frames, i):
-        speed = self.search_speed(skip_frames, i)
+    def search_delta_speed(self, width, height, skip_frames, i):
+        speed = self.search_speed(width, height, skip_frames, i)
         if i in self.speed:
             delta = speed - self.speed[i]
             if abs(delta) > 2:  # Если разница в скорости больше, чем 2 км/ч

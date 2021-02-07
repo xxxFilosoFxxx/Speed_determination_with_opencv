@@ -85,7 +85,7 @@ class DetectionPeople:
             cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
                           (0, 255, 0))  # Определение контура человека
 
-    def counting_object_and_search_speed(self, objects, frame):
+    def counting_object_and_search_speed(self, rect, objects, frame):
         """
         Функция осуществляет отслеживание, идентификацию,
         подсчет скорости объектов и вывод инфо в заданный файл
@@ -93,7 +93,6 @@ class DetectionPeople:
         # Добавление центроидов каждую секунду в упорядоченный словарь для нахождения скорости
         if self.frame_count % self.skip_frames == 0:
             self.centroids.save_centroids(objects)
-
         # цикл по отслеживанию объектов
         for (idx, (object_id, centroid)) in enumerate(objects.items()):
             # проверить, существует ли отслеживаемый объект для текущего
@@ -115,7 +114,10 @@ class DetectionPeople:
             cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 0, 255), -1)
 
             if self.frame_count % self.skip_frames == 0 or object_id not in self.centroids.speed:
-                self.centroids.search_delta_speed(self.skip_frames, object_id)
+                # t_width, t_height = int(rect[object_id][2] - rect[object_id][0]),\
+                #                     int(rect[object_id][3] - rect[object_id][1])
+                print(rect)  # TODO пробовать через расстояние камеры до объекта + качество
+                self.centroids.search_delta_speed(1, 1, self.skip_frames, object_id)
                 self.centroids.save_speed(int(self.frame_count / self.skip_frames),
                                           object_id, self.centroids.speed[object_id])
 
@@ -188,7 +190,7 @@ class DetectionPeople:
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = centroid_tracker.update(rect)
-                self.counting_object_and_search_speed(objects, frame)
+                self.counting_object_and_search_speed(rect, objects, frame)
                 self.frame_count += 1
 
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
@@ -219,6 +221,7 @@ class DetectionPeople:
         out_video = cv2.VideoWriter('data_user/output: %r.avi'
                                     % datetime.now().strftime("%d-%m-%Y %H:%M"),
                                     fourcc, self.skip_frames, (frame.shape[1], frame.shape[0]))
+        print("[INFO] video quality: {} {}".format(frame.shape[1], frame.shape[0]))
         trackers = list()
         while self.cap.isOpened():
             ret, frame = self.cap.read()
@@ -231,11 +234,11 @@ class DetectionPeople:
                     trackers = list()
                     cols, rows, out = self.config(frame_resized)
                     self.search_people(cols, rows, out, rgb, frame, trackers)
-                    self.status_tracking(rect, rgb, frame, trackers)  # TODO
+                    self.status_tracking(rect, rgb, frame, trackers)
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = centroid_tracker.update(rect)
-                self.counting_object_and_search_speed(objects, frame)
+                self.counting_object_and_search_speed(rect, objects, frame)
 
                 info = [
                     ("Number of tracked objects", len(objects)),
