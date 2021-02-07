@@ -8,13 +8,14 @@ import math
 import copy
 import os
 
-PPM = os.environ.get('PPM', 25)  # пиксель на метр
+PPM = os.environ.get('PPM', 2500)  # пиксель на метр
 
 
 class SearchSpeed:
     """ Основной класс для нахождения скорости объекта """
     def __init__(self):
         self.track = dict()
+        self.speed = OrderedDict()
         self.centroids = OrderedDict()
         self.last_centroids = OrderedDict()
 
@@ -42,7 +43,7 @@ class SearchSpeed:
 
     def search_speed(self, skip_frames, i):
         """
-            Основаня функция для поиска скорости объекта за один кадр
+            Основаня функция для поиска скорости объекта
         Args:
             skip_frames: частота кадров в секунду на видео
             i: идентификатор объекта
@@ -57,9 +58,18 @@ class SearchSpeed:
             d_meters = d_pixels / ppm
             fps = skip_frames
             speed = d_meters * fps * 3.6
-            return speed  # Средняя скорость идущего человека 5-6 км/ч, бег 10-15 км/ч
+            return int(speed)  # Средняя скорость идущего человека 5-6 км/ч, бег 10-15 км/ч
         else:
             return 0
+
+    def search_delta_speed(self, skip_frames, i):
+        speed = self.search_speed(skip_frames, i)
+        if i in self.speed:
+            delta = speed - self.speed[i]
+            if abs(delta) > 2:  # Если разница в скорости больше, чем 2 км/ч
+                self.speed[i] = speed
+        else:
+            self.speed[i] = speed
 
     @staticmethod
     def save_speed(timestamp, object_id, speed):
@@ -71,5 +81,5 @@ class SearchSpeed:
             speed: скорость объекта
         """
         with open("test_result.txt", "a") as file:
-            file.write("timestamp {}: ID {}: speed {:.2f}\n"
-                       .format(int(timestamp), object_id + 1, speed))
+            file.write("timestamp {}: ID {}: speed {}\n"
+                       .format(timestamp, object_id + 1, speed))

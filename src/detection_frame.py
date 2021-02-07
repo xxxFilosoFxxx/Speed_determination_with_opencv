@@ -85,7 +85,7 @@ class DetectionPeople:
             cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
                           (0, 255, 0))  # Определение контура человека
 
-    def counting_and_speed_object(self, objects, frame):
+    def counting_object_and_search_speed(self, objects, frame):
         """
         Функция осуществляет отслеживание, идентификацию,
         подсчет скорости объектов и вывод инфо в заданный файл
@@ -114,26 +114,26 @@ class DetectionPeople:
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 0, 255), -1)
 
-            if self.frame_count % self.skip_frames == 0:
-                speed = self.centroids.search_speed(self.skip_frames, object_id)
-                self.centroids.save_speed((self.frame_count / self.skip_frames), object_id, speed)
+            if self.frame_count % self.skip_frames == 0 or object_id not in self.centroids.speed:
+                self.centroids.search_delta_speed(self.skip_frames, object_id)
+                self.centroids.save_speed(int(self.frame_count / self.skip_frames),
+                                          object_id, self.centroids.speed[object_id])
 
-                speed_label = str("%.2f" % speed) + " km/hr"
-                speed_label_size, base_line = cv2.getTextSize(speed_label,
-                                                              cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-
-                y_left_bottom = max(centroid[1], speed_label_size[1])
-                cv2.rectangle(frame,
-                              (centroid[0] + 50, centroid[1] - speed_label_size[1] - 100),
-                              (centroid[0] - speed_label_size[1] - 35,
-                               y_left_bottom + base_line - 100),
-                              (255, 255, 255), cv2.FILLED)
-                cv2.putText(frame, speed_label, (centroid[0] - 50, y_left_bottom - 100),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
-                info = "time {}: ID {}: {}".format(int(self.frame_count / self.skip_frames),
-                                                   int(object_id + 1), speed_label)
-                cv2.putText(frame, info, (700, frame.shape[0] - ((idx * 50) + 50)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 0), 1, cv2.LINE_AA)
+            speed_label = str("%d" % self.centroids.speed[object_id]) + " km/hr"
+            speed_label_size, base_line = cv2.getTextSize(speed_label,
+                                                          cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+            y_left_bottom = max(centroid[1], speed_label_size[1])
+            cv2.rectangle(frame,
+                          (centroid[0] + 50, centroid[1] - speed_label_size[1] - 100),
+                          (centroid[0] - speed_label_size[1] - 35,
+                           y_left_bottom + base_line - 100),
+                          (255, 255, 255), cv2.FILLED)
+            cv2.putText(frame, speed_label, (centroid[0] - 50, y_left_bottom - 100),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+            info = "time {}: ID {}: {}".format(int(self.frame_count / self.skip_frames),
+                                               int(object_id + 1), speed_label)
+            cv2.putText(frame, info, (700, frame.shape[0] - ((idx * 50) + 50)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 0), 1, cv2.LINE_AA)
 
     def config(self, frame):
         """
@@ -172,7 +172,6 @@ class DetectionPeople:
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
             return -1
-        # sum_speed = dict()  # Суммарная скорость объектов за секунду реального времени
         trackers = list()
         while self.cap.isOpened():
             ret, frame = self.cap.read()
@@ -189,7 +188,7 @@ class DetectionPeople:
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = centroid_tracker.update(rect)
-                self.counting_and_speed_object(objects, frame)
+                self.counting_object_and_search_speed(objects, frame)
                 self.frame_count += 1
 
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
@@ -211,7 +210,7 @@ class DetectionPeople:
         Функция сохраняет файл после обработки
         """
         fps = FPS().start()
-        centroid_tracker = CentroidTracker(maxDisappeared=40, maxDistance=120)
+        centroid_tracker = CentroidTracker(maxDisappeared=40, maxDistance=60)
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
@@ -219,8 +218,7 @@ class DetectionPeople:
         ret, frame = self.cap.read()
         out_video = cv2.VideoWriter('data_user/output: %r.avi'
                                     % datetime.now().strftime("%d-%m-%Y %H:%M"),
-                                    fourcc, 30.0, (frame.shape[1], frame.shape[0]))
-        # sum_speed = dict()  # Суммарная скорость объектов за секунду реального времени
+                                    fourcc, self.skip_frames, (frame.shape[1], frame.shape[0]))
         trackers = list()
         while self.cap.isOpened():
             ret, frame = self.cap.read()
@@ -237,7 +235,7 @@ class DetectionPeople:
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = centroid_tracker.update(rect)
-                self.counting_and_speed_object(objects, frame)
+                self.counting_object_and_search_speed(objects, frame)
 
                 info = [
                     ("Number of tracked objects", len(objects)),
