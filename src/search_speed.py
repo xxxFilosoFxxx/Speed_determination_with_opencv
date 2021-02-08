@@ -54,7 +54,6 @@ class SearchSpeed:
             d_pixels = math.sqrt(math.pow(self.last_centroids[i][0] - self.centroids[i][0], 2) +
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
             ppm = (height / width) * 1024
-            # ppm = PPM
             d_meters = d_pixels / ppm
             fps = skip_frames
             speed = d_meters * fps * 3.6

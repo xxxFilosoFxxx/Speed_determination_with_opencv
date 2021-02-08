@@ -54,12 +54,12 @@ Run all tests with coverage by running (venv must be activated):
 ```
 Name                                Stmts   Miss  Cover
 -------------------------------------------------------
-src/detection_frame.py                152      1    99%
-src/idtracker/centroid_tracker.py      60      1    98%
+src/detection_frame.py                156      1    99%
+src/idtracker/centroid_tracker.py      63      0   100%
 src/idtracker/trackable_object.py       5      0   100%
-src/search_speed.py                    30      0   100%
+src/search_speed.py                    39      0   100%
 -------------------------------------------------------
-TOTAL                                 247      2    99%
+TOTAL                                 263      1    99%
 ```
 
 For detailed report run:

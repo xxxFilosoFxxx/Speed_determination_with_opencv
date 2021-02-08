@@ -29,27 +29,36 @@ class TestFrame(unittest.TestCase):
         last_centroids = test_class_speed.save_centroids(test_dict)
         self.assertEqual(last_centroids, test_dict)
 
-        test_speed = test_class_speed.search_speed(30, 0)
+        width, height = 10, 20  # Возьмем статическую высоту и ширину
+        fps = 30  # Возьмем статическую частоту кадров
+        test_speed = test_class_speed.search_speed(width, height, fps, 0)
 
         d_pixels = math.sqrt(math.pow(last_centroids[0][0] - centroids[0][0], 2) +
                              math.pow(last_centroids[0][1] - centroids[0][1], 2))
-        ppm = PPM
+        ppm = (height / width) * 1024
         d_meters = d_pixels / ppm
-        fps = 30
-        speed = d_meters * fps * 3.6
+        speed = int(d_meters * fps * 3.6)
         self.assertEqual(test_speed, speed)
 
         update_last_centroids = test_class_speed.save_centroids(test_dict)
         self.assertEqual(update_last_centroids, test_dict)
 
-        zero_speed = test_class_speed.search_speed(30, 1)
+        zero_speed = test_class_speed.search_speed(width, height, fps, 1)
         self.assertEqual(zero_speed, 0)
+
+    def test_speed_with_delta(self):
+        """
+        Тест на определение скорости с помощью
+        файла с ранее записанными скоростями
+        """
+        # TODO
+        pass
 
     def test_full_search_show(self):
         """
         Тест на сохранение и обработку итогового видеофайла
         """
-        people = DetectionPeople('data_user/парковка.mp4')
+        people = DetectionPeople('data_user/расстояние.mp4')
         self.assertTrue(people.cap.isOpened())
         self.assertEqual(people.save_frames(), 0)
 
@@ -57,7 +66,7 @@ class TestFrame(unittest.TestCase):
         """
         Тест на обработку вывод на экран итогового видеофайла
         """
-        people = DetectionPeople('data_user/парковка.mp4')
+        people = DetectionPeople('data_user/расстояние.mp4')
         self.assertTrue(people.cap.isOpened())
         self.assertEqual(people.show_video(), 0)
 
