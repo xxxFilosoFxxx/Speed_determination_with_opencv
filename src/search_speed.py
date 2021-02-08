@@ -6,6 +6,10 @@
 from collections import OrderedDict
 import math
 import copy
+import os
+
+# Путь к обрабатываемому видео
+DELTA = os.environ.get('DELTA', 2)
 
 
 class SearchSpeed:
@@ -73,7 +77,7 @@ class SearchSpeed:
         speed = self.search_speed(width, height, skip_frames, i)
         if i in self.speed:
             delta = speed - self.speed[i]
-            if abs(delta) > 2:  # Дельта скорости объекта
+            if abs(delta) > DELTA:  # Дельта скорости объекта
                 self.speed[i] = speed
         else:
             self.speed[i] = speed
