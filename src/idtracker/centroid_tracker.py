@@ -29,12 +29,14 @@ class CentroidTracker:
                     self.deregister(objectID)
             return self.objects
 
-        inputCentroids = np.zeros((len(rects), 2), dtype="int")
+        inputCentroids = np.zeros((len(rects), 4), dtype="int")
 
         for (i, (startX, startY, endX, endY)) in enumerate(rects):
             cX = int((startX + endX) / 2.0)
             cY = int((startY + endY) / 2.0)
-            inputCentroids[i] = (cX, cY)
+            cW = int(endX - startX)
+            cH = int(endY - startY)
+            inputCentroids[i] = (cX, cY, cW, cH)
 
         if len(self.objects) == 0:
             for i in range(0, len(inputCentroids)):

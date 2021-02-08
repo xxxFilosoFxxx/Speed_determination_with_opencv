@@ -56,7 +56,8 @@ class SearchSpeed:
         if i in self.centroids and i in self.last_centroids:
             d_pixels = math.sqrt(math.pow(self.last_centroids[i][0] - self.centroids[i][0], 2) +
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
-            ppm = PPM  # узнать через высоту камеры
+            ppm = height / width
+            # ppm = PPM
             print(i, ppm)
             d_meters = d_pixels / ppm
             fps = skip_frames
@@ -69,7 +70,7 @@ class SearchSpeed:
         speed = self.search_speed(width, height, skip_frames, i)
         if i in self.speed:
             delta = speed - self.speed[i]
-            if abs(delta) > 2:  # Если разница в скорости больше, чем 2 км/ч
+            if abs(delta) > 0.5:  # Если разница в скорости больше, чем 2 км/ч
                 self.speed[i] = speed
         else:
             self.speed[i] = speed
