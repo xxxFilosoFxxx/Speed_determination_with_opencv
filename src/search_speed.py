@@ -6,9 +6,6 @@
 from collections import OrderedDict
 import math
 import copy
-import os
-
-PPM = os.environ.get('PPM', 2500)  # пиксель на метр
 
 
 class SearchSpeed:
@@ -56,9 +53,8 @@ class SearchSpeed:
         if i in self.centroids and i in self.last_centroids:
             d_pixels = math.sqrt(math.pow(self.last_centroids[i][0] - self.centroids[i][0], 2) +
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
-            ppm = height / width
+            ppm = (height / width) * 1024
             # ppm = PPM
-            print(i, ppm)
             d_meters = d_pixels / ppm
             fps = skip_frames
             speed = d_meters * fps * 3.6
@@ -67,10 +63,18 @@ class SearchSpeed:
             return 0
 
     def search_delta_speed(self, width, height, skip_frames, i):
+        """
+            Функция для записи текущей скорости и высчитывание дельты
+        Args:
+            width: ширина фигуры объекта
+            height: высота фигуры объекта
+            skip_frames: частота кадров в секунду на видео
+            i: идентификатор объекта
+        """
         speed = self.search_speed(width, height, skip_frames, i)
         if i in self.speed:
             delta = speed - self.speed[i]
-            if abs(delta) > 0.5:  # Если разница в скорости больше, чем 2 км/ч
+            if abs(delta) > 2:  # Дельта скорости объекта
                 self.speed[i] = speed
         else:
             self.speed[i] = speed

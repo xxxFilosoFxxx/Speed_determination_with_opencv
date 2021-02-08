@@ -1,81 +1,102 @@
-# pylint: skip-file
-from scipy.spatial import distance as dist
+# pylint: disable=R0912, R0914
+"""
+Основной скрипт для отслеживания объектов
+"""
 from collections import OrderedDict
+from scipy.spatial import distance as dist
 import numpy as np
 
 
 class CentroidTracker:
-    def __init__(self, maxDisappeared=50, maxDistance=50):
-        self.nextObjectID = 0
+    """ Основной класс для отслеживания объектов """
+    def __init__(self, max_disappeared=50, max_distance=50):
+        self.next_object_id = 0
         self.objects = OrderedDict()
         self.disappeared = OrderedDict()
-        self.maxDisappeared = maxDisappeared
-        self.maxDistance = maxDistance
+        self.max_disappeared = max_disappeared
+        self.max_distance = max_distance
 
     def register(self, centroid):
-        self.objects[self.nextObjectID] = centroid
-        self.disappeared[self.nextObjectID] = 0
-        self.nextObjectID += 1
+        """
+            Добавление новых объектов для отслеживания
+        Args:
+            centroid: координаты центроида
+        """
+        self.objects[self.next_object_id] = centroid
+        self.disappeared[self.next_object_id] = 0
+        self.next_object_id += 1
 
-    def deregister(self, objectID):
-        del self.objects[objectID]
-        del self.disappeared[objectID]
+    def deregister(self, object_id):
+        """
+            Удаление объектов из числа отслеживаемых
+        Args:
+            object_id: идентификатор объекта
+        """
+        del self.objects[object_id]
+        del self.disappeared[object_id]
 
     def update(self, rects):
-        if len(rects) == 0:
-            for objectID in list(self.disappeared.keys()):
-                self.disappeared[objectID] += 1
-                if self.disappeared[objectID] > self.maxDisappeared:
-                    self.deregister(objectID)
+        """
+            Обновление координат отслеживаемых объектов
+        Args:
+            rects: координаты фигуры объекта
+        Returns:
+            Словарь отслеживаемых объектов
+        """
+        if not rects:
+            for object_id in list(self.disappeared.keys()):
+                self.disappeared[object_id] += 1
+                if self.disappeared[object_id] > self.max_disappeared:
+                    self.deregister(object_id)
             return self.objects
 
-        inputCentroids = np.zeros((len(rects), 4), dtype="int")
+        input_centroids = np.zeros((len(rects), 4), dtype="int")
 
-        for (i, (startX, startY, endX, endY)) in enumerate(rects):
-            cX = int((startX + endX) / 2.0)
-            cY = int((startY + endY) / 2.0)
-            cW = int(endX - startX)
-            cH = int(endY - startY)
-            inputCentroids[i] = (cX, cY, cW, cH)
+        for (i, (start_x, start_y, end_x, end_y)) in enumerate(rects):
+            c_x = int((start_x + end_x) / 2.0)
+            c_y = int((start_y + end_y) / 2.0)
+            c_w = int(end_x - start_x)
+            c_h = int(end_y - start_y)
+            input_centroids[i] = (c_x, c_y, c_w, c_h)
 
-        if len(self.objects) == 0:
-            for i in range(0, len(inputCentroids)):
-                self.register(inputCentroids[i])
+        if not self.objects:
+            for i, value in enumerate(input_centroids):
+                self.register(value)
 
         else:
-            objectIDs = list(self.objects.keys())
-            objectCentroids = list(self.objects.values())
+            object_i_ds = list(self.objects.keys())
+            object_centroids = list(self.objects.values())
 
-            D = dist.cdist(np.array(objectCentroids), inputCentroids)
+            _d = dist.cdist(np.array(object_centroids), input_centroids)
 
-            rows = D.min(axis=1).argsort()
-            cols = D.argmin(axis=1)[rows]
+            rows = _d.min(axis=1).argsort()
+            cols = _d.argmin(axis=1)[rows]
 
-            usedRows = set()
-            usedCols = set()
+            used_rows = set()
+            used_cols = set()
 
             for (row, col) in zip(rows, cols):
-                if row in usedRows or col in usedCols:
+                if row in used_rows or col in used_cols:
                     continue
-                if D[row, col] > self.maxDistance:
+                if _d[row, col] > self.max_distance:
                     continue
 
-                objectID = objectIDs[row]
-                self.objects[objectID] = inputCentroids[col]
-                self.disappeared[objectID] = 0
+                object_id = object_i_ds[row]
+                self.objects[object_id] = input_centroids[col]
+                self.disappeared[object_id] = 0
 
-                usedRows.add(row)
-                usedCols.add(col)
+                used_rows.add(row)
+                used_cols.add(col)
 
-            unusedRows = set(range(0, D.shape[0])).difference(usedRows)
-            unusedCols = set(range(0, D.shape[1])).difference(usedCols)
-            if D.shape[0] >= D.shape[1]:
-                for row in unusedRows:
-                    objectID = objectIDs[row]
-                    self.disappeared[objectID] += 1
-                    if self.disappeared[objectID] > self.maxDisappeared:
-                        self.deregister(objectID)
+            unused_rows = set(range(0, _d.shape[0])).difference(used_rows)
+            unused_cols = set(range(0, _d.shape[1])).difference(used_cols)
+            if _d.shape[0] >= _d.shape[1]:
+                for row in unused_rows:
+                    object_id = object_i_ds[row]
+                    self.disappeared[object_id] += 1
+                    if self.disappeared[object_id] > self.max_disappeared:
+                        self.deregister(object_id)
             else:
-                for col in unusedCols:
-                    self.register(inputCentroids[col])
+                for col in unused_cols:
+                    self.register(input_centroids[col])
         return self.objects

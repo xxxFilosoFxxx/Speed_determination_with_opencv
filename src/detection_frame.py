@@ -1,6 +1,6 @@
-# pylint: disable=import-error, R0902, R0913, R0914
+# pylint: disable=E0401, R0902, R0913, R0914
 """
-Основной файл
+Основной скрипт для распознавания и подсчета скорости объекта
 """
 from datetime import datetime
 import os
@@ -13,7 +13,7 @@ from src.idtracker.trackable_object import TrackableObject
 from src.search_speed import SearchSpeed
 
 # Путь к обрабатываемому видео
-PATH_VIDEO = os.environ.get('VIDEO', 'data_user/расстояние.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')
 # процент распознавания
 PERCENT = os.environ.get('PERCENT', 0.2)
 
@@ -85,7 +85,7 @@ class DetectionPeople:
             cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
                           (0, 255, 0))  # Определение контура человека
 
-    def counting_object_and_search_speed(self, objects, frame):
+    def object_and_speed(self, objects, frame):
         """
         Функция осуществляет отслеживание, идентификацию,
         подсчет скорости объектов и вывод инфо в заданный файл
@@ -113,10 +113,11 @@ class DetectionPeople:
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 0, 255), -1)
 
-            if self.frame_count % int(self.skip_frames) == 0 or object_id not in self.centroids.speed:
-                # TODO
-                # print(centroid)
-                self.centroids.search_delta_speed(centroid[2], centroid[3], self.skip_frames, object_id)
+            if self.frame_count % int(self.skip_frames) == 0 or \
+                    object_id not in self.centroids.speed:
+                # берем высотку и ширину выделенной фигуры объекта для нахождения скорсоти
+                self.centroids.search_delta_speed(centroid[2], centroid[3],
+                                                  self.skip_frames, object_id)
                 self.centroids.save_speed(int(self.frame_count / self.skip_frames),
                                           object_id, self.centroids.speed[object_id])
 
@@ -169,7 +170,7 @@ class DetectionPeople:
         обработать видеозафайл
         """
         fps = FPS().start()
-        centroid_tracker = CentroidTracker(maxDisappeared=40, maxDistance=60)
+        centroid_tracker = CentroidTracker(max_disappeared=40, max_distance=60)
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
             return -1
@@ -189,7 +190,7 @@ class DetectionPeople:
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = centroid_tracker.update(rect)
-                self.counting_object_and_search_speed(objects, frame)
+                self.object_and_speed(objects, frame)
                 self.frame_count += 1
 
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
@@ -211,7 +212,7 @@ class DetectionPeople:
         Функция сохраняет файл после обработки
         """
         fps = FPS().start()
-        centroid_tracker = CentroidTracker(maxDisappeared=40, maxDistance=80)
+        centroid_tracker = CentroidTracker(max_disappeared=40, max_distance=80)
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
@@ -237,7 +238,7 @@ class DetectionPeople:
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = centroid_tracker.update(rect)
-                self.counting_object_and_search_speed(objects, frame)
+                self.object_and_speed(objects, frame)
 
                 info = [
                     ("Number of tracked objects", len(objects)),

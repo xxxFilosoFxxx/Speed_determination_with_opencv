@@ -45,8 +45,6 @@ It is also possible to use 2 environment variables:
  
 - Recognition percentage -> ```PERCENT```
 
-- Pixel per meter -> ```PPM```
-
 ## Testing
 
 Run all tests with coverage by running (venv must be activated):

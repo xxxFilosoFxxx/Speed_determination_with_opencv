@@ -15,7 +15,7 @@ class TestIdTracker(unittest.TestCase):
         """
         Тест для проверки трекера
         """
-        centroid_tracker = CentroidTracker(maxDisappeared=1)
+        centroid_tracker = CentroidTracker(max_disappeared=1)
         objects = OrderedDict()
         rect = list()
 

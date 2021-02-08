@@ -6,7 +6,6 @@ import math
 from collections import OrderedDict
 from src.detection_frame import DetectionPeople
 from src.search_speed import SearchSpeed
-from src.search_speed import PPM
 
 
 class TestFrame(unittest.TestCase):
