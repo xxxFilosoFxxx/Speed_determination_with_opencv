@@ -5,6 +5,7 @@
 from datetime import datetime
 import os
 import dlib
+import numpy as np
 from cv2 import cv2
 from imutils.video import FPS
 
@@ -13,10 +14,10 @@ from src.idtracker.trackable_object import TrackableObject
 from src.search_speed import SearchSpeed
 
 # Путь к обрабатываемому видео
-PATH_VIDEO = os.environ.get('VIDEO', 'data_user/расстояние.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')
 # процент распознавания
 PERCENT = os.environ.get('PERCENT', 0.2)
-# промежуток времени, в течение которого находится скорость
+# интервал времени, в котором выполняется поиск скорости
 TIME = os.environ.get('TIME', 0.5)
 
 
@@ -30,36 +31,32 @@ class DetectionPeople:
         self.cap = cv2.VideoCapture(video)
         self.net = cv2.dnn.readNetFromCaffe("MobileNetSSD/MobileNetSSD_deploy.prototxt",
                                             "MobileNetSSD/MobileNetSSD_deploy.caffemodel")
-        self.class_name = {15: 'person'}
+        self.class_name = {0: 'background', 1: 'aeroplane', 2: 'bicycle', 3: 'bird',
+                           4: 'boat', 5: 'bottle', 6: 'bus', 7: 'car', 8: 'cat',
+                           9: 'chair', 10: 'cow', 11: 'diningtable', 12: 'dog',
+                           13: 'horse', 14: 'motorbike', 15: 'person', 16: 'pottedplant',
+                           17: 'sheep', 18: 'sofa', 19: 'train', 20: 'tvmonitor'}
         self.percent = PERCENT
         self.centroids = SearchSpeed()
         self.frame_count = 0
         self.people_count = 0
         self.skip_frames = self.cap.get(cv2.CAP_PROP_FPS)
 
-    def search_people(self, cols, rows, out, rgb, frame, trackers):
+    def search_people(self, wight, height, out, rgb, trackers):
         """
         Основная функция для детектирования объектов
         по назначенным классам
         """
         for i in range(0, out.shape[2]):
             confidence = out[0, 0, i, 2]
-            class_id = int(out[0, 0, i, 1])
-            if confidence > self.percent and class_id in self.class_name:
+            if confidence > self.percent:
+                class_id = int(out[0, 0, i, 1])
+                if self.class_name[class_id] != "person":
+                    continue
 
-                x_left_bottom = int(out[0, 0, i, 3] * cols)
-                y_left_bottom = int(out[0, 0, i, 4] * rows)
-                x_right_top = int(out[0, 0, i, 5] * cols)
-                y_right_top = int(out[0, 0, i, 6] * rows)
-
-                height_factor = frame.shape[0] / 300.0
-                width_factor = frame.shape[1] / 300.0
-
-                x_left_bottom = int(width_factor * x_left_bottom)
-                y_left_bottom = int(height_factor * y_left_bottom)
-                x_right_top = int(width_factor * x_right_top)
-                y_right_top = int(height_factor * y_right_top)
-
+                # вычислить координаты ограничительной рамки для объекта
+                box = out[0, 0, i, 3:7] * np.array([wight, height, wight, height])
+                (x_left_bottom, y_left_bottom, x_right_top, y_right_top) = box.astype("int")
                 # Создаем прямоугольник объекта с помошью dlib из ограничивающего
                 # Поле координат, а затем запустить корреляцию dlib трекер
                 tracker_id = dlib.correlation_tracker()
@@ -143,14 +140,14 @@ class DetectionPeople:
         """
         Функция для задания настроек видеофайла
         """
-        blob = cv2.dnn.blobFromImage(frame, 1.0 / 255, (300, 300), 127.5)
+        wight = frame.shape[1]
+        height = frame.shape[0]
+
+        blob = cv2.dnn.blobFromImage(frame, 0.007843, (wight, height), 127.5)
         self.net.setInput(blob)
         out = self.net.forward()
 
-        cols = frame.shape[1]
-        rows = frame.shape[0]
-
-        return cols, rows, out
+        return wight, height, out
 
     @staticmethod
     def statistics_output(info, frame):
@@ -181,14 +178,12 @@ class DetectionPeople:
             ret, frame = self.cap.read()
             if ret:
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame_resized = cv2.resize(rgb, (300, 300))
 
                 rect = list()
                 if self.frame_count % int(self.skip_frames) == 0:
                     trackers = list()
-                    cols, rows, out = self.config(frame_resized)
-                    self.search_people(cols, rows, out, rgb, frame, trackers)
-                    self.status_tracking(rect, rgb, frame, trackers)
+                    wight, height, out = self.config(frame)
+                    self.search_people(wight, height, out, rgb, trackers)
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = centroid_tracker.update(rect)
@@ -214,7 +209,7 @@ class DetectionPeople:
         Функция сохраняет файл после обработки
         """
         fps = FPS().start()
-        centroid_tracker = CentroidTracker(max_disappeared=40, max_distance=80)
+        centroid_tracker = CentroidTracker(max_disappeared=40, max_distance=60)
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
@@ -229,14 +224,12 @@ class DetectionPeople:
             ret, frame = self.cap.read()
             if ret:
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame_resized = cv2.resize(frame, (300, 300))
 
                 rect = list()
                 if self.frame_count % int(self.skip_frames) == 0:
                     trackers = list()
-                    cols, rows, out = self.config(frame_resized)
-                    self.search_people(cols, rows, out, rgb, frame, trackers)
-                    self.status_tracking(rect, rgb, frame, trackers)
+                    wight, height, out = self.config(frame)
+                    self.search_people(wight, height, out, rgb, trackers)
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = centroid_tracker.update(rect)

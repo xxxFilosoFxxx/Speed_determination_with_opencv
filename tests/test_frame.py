@@ -36,8 +36,7 @@ class TestFrame(unittest.TestCase):
         d_pixels = math.sqrt(math.pow(last_centroids[0][0] - centroids[0][0], 2) +
                              math.pow(last_centroids[0][1] - centroids[0][1], 2))
         ppm = (height / width) * 1024
-        d_meters = d_pixels / ppm
-        speed = int(d_meters * fps * 3.6)
+        speed = int((d_pixels / ppm) * fps * 3.6)
         self.assertEqual(test_speed, speed)
 
         update_last_centroids = test_class_speed.save_centroids(test_dict)
@@ -58,7 +57,7 @@ class TestFrame(unittest.TestCase):
         """
         Тест на сохранение и обработку итогового видеофайла
         """
-        people = DetectionPeople('data_user/расстояние.mp4')
+        people = DetectionPeople('data_user/видеонаблюдение.mp4')
         self.assertTrue(people.cap.isOpened())
         self.assertEqual(people.save_frames(), 0)
 
@@ -66,7 +65,7 @@ class TestFrame(unittest.TestCase):
         """
         Тест на обработку вывод на экран итогового видеофайла
         """
-        people = DetectionPeople('data_user/расстояние.mp4')
+        people = DetectionPeople('data_user/видеонаблюдение.mp4')
         self.assertTrue(people.cap.isOpened())
         self.assertEqual(people.show_video(), 0)
 
