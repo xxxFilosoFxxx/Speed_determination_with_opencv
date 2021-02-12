@@ -9,7 +9,7 @@ import copy
 import os
 
 # Путь к обрабатываемому видео
-DELTA = os.environ.get('DELTA', 2)
+DELTA = os.environ.get('DELTA', 1)
 
 
 class SearchSpeed:

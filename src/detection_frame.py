@@ -13,9 +13,11 @@ from src.idtracker.trackable_object import TrackableObject
 from src.search_speed import SearchSpeed
 
 # Путь к обрабатываемому видео
-PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_user/расстояние.mp4')
 # процент распознавания
 PERCENT = os.environ.get('PERCENT', 0.2)
+# промежуток времени, в течение которого находится скорость
+TIME = os.environ.get('TIME', 0.5)
 
 
 class DetectionPeople:
@@ -91,7 +93,7 @@ class DetectionPeople:
         подсчет скорости объектов и вывод инфо в заданный файл
         """
         # Добавление центроидов каждую секунду в упорядоченный словарь для нахождения скорости
-        if self.frame_count % int(self.skip_frames) == 0:
+        if self.frame_count % (int(self.skip_frames) * TIME) == 0:
             self.centroids.save_centroids(objects)
         # цикл по отслеживанию объектов
         for (idx, (object_id, centroid)) in enumerate(objects.items()):
@@ -113,7 +115,7 @@ class DetectionPeople:
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             cv2.circle(frame, (centroid[0], centroid[1]), 5, (0, 0, 255), -1)
 
-            if self.frame_count % int(self.skip_frames) == 0 or \
+            if self.frame_count % (int(self.skip_frames) * TIME) == 0 or \
                     object_id not in self.centroids.speed:
                 # берем высотку и ширину выделенной фигуры объекта для нахождения скорсоти
                 self.centroids.search_delta_speed(centroid[2], centroid[3],
