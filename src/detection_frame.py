@@ -18,7 +18,7 @@ PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.m
 # процент распознавания
 PERCENT = os.environ.get('PERCENT', 0.2)
 # интервал времени, в котором выполняется поиск скорости
-TIME = os.environ.get('TIME', 0.5)
+TIME = os.environ.get('TIME', 1)
 
 
 class DetectionPeople:

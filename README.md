@@ -45,9 +45,13 @@ It is also possible to use 2 environment variables:
  
 - Recognition percentage -> ```PERCENT```
 - Object speed difference -> ```DELTA```
-- time interval in which the speed is search -> ```TIME```
+- Time interval in which the speed is search -> ```TIME```
+
+To use these variables when starting ```docker run``` add the parameter ```-e parameter=value```
 
 ## Testing
+
+Before testing, you need to install the libraries from the file ```requirements.txt```
 
 Run all tests with coverage by running (venv must be activated):
 
@@ -70,6 +74,8 @@ For detailed report run:
 - coverage html
 
 ## Code inspection
+
+Before inspection, you need to install the libraries from the ```requirements.txt``` file
 
 For src and tests: ```pylint src tests```
 
