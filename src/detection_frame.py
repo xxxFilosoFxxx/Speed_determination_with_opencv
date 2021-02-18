@@ -218,10 +218,10 @@ class DetectionPeople:
             print("[INFO] failed to process video")
             return -1
         ret, frame = self.cap.read()
-        filename_video = 'data_user/output_video: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M")
+        filename = 'data_user/output_video: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M")
         filename_csv = 'data_user/output_csv: %r.csv' % datetime.now().strftime("%d-%m-%Y %H:%M")
 
-        out_video = cv2.VideoWriter(filename_video, fourcc, self.skip_frames,
+        out_video = cv2.VideoWriter(filename, fourcc, self.skip_frames,
                                     (frame.shape[1], frame.shape[0]))
         with open(filename_csv, mode="w", encoding='utf-8') as file:
             file.write("timestamp;ID;speed\r\n")
