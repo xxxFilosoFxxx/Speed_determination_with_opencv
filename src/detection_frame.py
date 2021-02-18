@@ -4,8 +4,8 @@
 """
 from datetime import datetime
 import os
-import dlib
 import numpy as np
+import dlib
 from cv2 import cv2
 from imutils.video import FPS
 
@@ -14,7 +14,7 @@ from src.idtracker.trackable_object import TrackableObject
 from src.search_speed import SearchSpeed
 
 # Путь к обрабатываемому видео
-PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')  # TODO: урезать тестовое видео
+PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')
 # процент распознавания
 PERCENT = os.environ.get('PERCENT', 0.2)
 # интервал времени, в котором выполняется поиск скорости
@@ -173,7 +173,7 @@ class DetectionPeople:
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
             return -1
-        filename_csv = 'data_user/output: %r.csv' % datetime.now().strftime("%d-%m-%Y %H:%M")
+        filename_csv = 'data_user/output_csv: %r.csv' % datetime.now().strftime("%d-%m-%Y %H:%M")
         with open(filename_csv, mode="w", encoding='utf-8') as file:
             file.write("timestamp;ID;speed\r\n")
         trackers = list()
@@ -212,14 +212,14 @@ class DetectionPeople:
         Функция сохраняет файл после обработки
         """
         fps = FPS().start()
-        centroid_tracker = CentroidTracker(max_disappeared=50, max_distance=80)
+        centroid_tracker = CentroidTracker(max_disappeared=40, max_distance=60)
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
             return -1
         ret, frame = self.cap.read()
-        filename_video = 'data_user/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M")
-        filename_csv = 'data_user/output: %r.csv' % datetime.now().strftime("%d-%m-%Y %H:%M")
+        filename_video = 'data_user/output_video: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M")
+        filename_csv = 'data_user/output_csv: %r.csv' % datetime.now().strftime("%d-%m-%Y %H:%M")
 
         out_video = cv2.VideoWriter(filename_video, fourcc, self.skip_frames,
                                     (frame.shape[1], frame.shape[0]))

@@ -13,7 +13,7 @@ An example of the processed file is located [this](video_detection_tests/test_fr
 
 - Third experiment - the prototype of the software tool processes the video and dynamically
 finds the speed of the given objects. 
-An example of the processed file is located [this](video_detection_tests/output:01-02-2021_05:34.avi).
+An example of the processed file is located [this](video_detection_tests/output_video_test.avi).
 
 ## Installation
 
@@ -60,12 +60,12 @@ Run all tests with coverage by running (venv must be activated):
 ```
 Name                                Stmts   Miss  Cover
 -------------------------------------------------------
-src/detection_frame.py                148      1    99%
+src/detection_frame.py                155      1    99%
 src/idtracker/centroid_tracker.py      63      0   100%
 src/idtracker/trackable_object.py       5      0   100%
 src/search_speed.py                    41      0   100%
 -------------------------------------------------------
-TOTAL                                 257      1    99%
+TOTAL                                 264      1    99%
 ```
 
 For detailed report run:

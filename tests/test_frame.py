@@ -3,6 +3,8 @@
 """
 import unittest
 import math
+import glob
+import csv
 from collections import OrderedDict
 from src.detection_frame import DetectionPeople
 from src.search_speed import SearchSpeed
@@ -45,15 +47,7 @@ class TestFrame(unittest.TestCase):
         zero_speed = test_class_speed.search_speed(width, height, fps, 1)
         self.assertEqual(zero_speed, 0)
 
-    def test_speed_with_delta(self):
-        """
-        Тест на определение скорости с помощью
-        файла с ранее записанными скоростями
-        """
-        # TODO
-        pass
-
-    def test_full_search_show(self):
+    def test_full_search_save(self):
         """
         Тест на сохранение и обработку итогового видеофайла
         """
@@ -61,7 +55,33 @@ class TestFrame(unittest.TestCase):
         self.assertTrue(people.cap.isOpened())
         self.assertEqual(people.save_frames(), 0)
 
-    def test_full_search_save(self):
+    def test_speed_with_delta(self):
+        """
+        Тест на определение допустимого диапазона скорости
+        """
+        file = glob.glob("data_user/*.csv")
+        if len(file) == 1 or len(file) == 2:
+            result = True
+            with open(str(file[0]), encoding='utf-8') as r_file:
+                file_reader = csv.reader(r_file, delimiter=";")
+                count = 0
+                for row in file_reader:
+                    if count == 0:
+                        pass
+                    else:
+                        # Средняя скорость идущего человека 5-6 км/ч, бег 10-15 км/ч
+                        if int(row[2]) > 15 or int(row[2]) < 0:
+                            result = False
+                    count += 1
+            self.assertTrue(result)
+
+        elif len(file) > 2:
+            self.fail("Пожалуйста, удалите все файлы `.csv` из папки `data_user` "
+                      "для точного тестирования.")
+        else:
+            self.fail("Тест не пройден, так как в папке `data_user` отсутвуют файлы со скоростью.")
+
+    def test_full_search_show(self):
         """
         Тест на обработку вывод на экран итогового видеофайла
         """
