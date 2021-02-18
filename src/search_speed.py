@@ -83,14 +83,14 @@ class SearchSpeed:
             self.speed[i] = speed
 
     @staticmethod
-    def save_speed(timestamp, object_id, speed):
+    def save_speed(filename, timestamp, object_id, speed):
         """
             Функция сохраняет скорость объекта в файл
         Args:
+            filename: Имя файла
             timestamp: Метка времени
             object_id: id объекта
             speed: скорость объекта
         """
-        with open("test_result.txt", "a") as file:
-            file.write("timestamp {}: ID {}: speed {}\n"
-                       .format(timestamp, object_id + 1, speed))
+        with open(filename, mode="a", encoding='utf-8') as file:
+            file.write("{};{};{}\r\n".format(timestamp, object_id + 1, speed))

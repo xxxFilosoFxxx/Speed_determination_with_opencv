@@ -14,7 +14,7 @@ from src.idtracker.trackable_object import TrackableObject
 from src.search_speed import SearchSpeed
 
 # Путь к обрабатываемому видео
-PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')  # TODO: урезать тестовое видео
 # процент распознавания
 PERCENT = os.environ.get('PERCENT', 0.2)
 # интервал времени, в котором выполняется поиск скорости
@@ -84,7 +84,7 @@ class DetectionPeople:
             cv2.rectangle(frame, (x_left_bottom, y_left_bottom), (x_right_top, y_right_top),
                           (0, 255, 0))  # Определение контура человека
 
-    def object_and_speed(self, objects, frame):
+    def object_and_speed(self, filename, objects, frame):
         """
         Функция осуществляет отслеживание, идентификацию,
         подсчет скорости объектов и вывод инфо в заданный файл
@@ -117,7 +117,7 @@ class DetectionPeople:
                 # берем высотку и ширину выделенной фигуры объекта для нахождения скорсоти
                 self.centroids.search_delta_speed(centroid[2], centroid[3],
                                                   self.skip_frames, object_id)
-                self.centroids.save_speed(int(self.frame_count / self.skip_frames),
+                self.centroids.save_speed(filename, int(self.frame_count / self.skip_frames),
                                           object_id, self.centroids.speed[object_id])
 
             speed_label = str("%d" % self.centroids.speed[object_id]) + " km/hr"
@@ -173,6 +173,9 @@ class DetectionPeople:
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
             return -1
+        filename_csv = 'data_user/output: %r.csv' % datetime.now().strftime("%d-%m-%Y %H:%M")
+        with open(filename_csv, mode="w", encoding='utf-8') as file:
+            file.write("timestamp;ID;speed\r\n")
         trackers = list()
         while self.cap.isOpened():
             ret, frame = self.cap.read()
@@ -187,7 +190,7 @@ class DetectionPeople:
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = centroid_tracker.update(rect)
-                self.object_and_speed(objects, frame)
+                self.object_and_speed(filename_csv, objects, frame)
                 self.frame_count += 1
 
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
@@ -209,15 +212,19 @@ class DetectionPeople:
         Функция сохраняет файл после обработки
         """
         fps = FPS().start()
-        centroid_tracker = CentroidTracker(max_disappeared=40, max_distance=60)
+        centroid_tracker = CentroidTracker(max_disappeared=50, max_distance=80)
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
             return -1
         ret, frame = self.cap.read()
-        out_video = cv2.VideoWriter('data_user/output: %r.avi'
-                                    % datetime.now().strftime("%d-%m-%Y %H:%M"),
-                                    fourcc, self.skip_frames, (frame.shape[1], frame.shape[0]))
+        filename_video = 'data_user/output: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M")
+        filename_csv = 'data_user/output: %r.csv' % datetime.now().strftime("%d-%m-%Y %H:%M")
+
+        out_video = cv2.VideoWriter(filename_video, fourcc, self.skip_frames,
+                                    (frame.shape[1], frame.shape[0]))
+        with open(filename_csv, mode="w", encoding='utf-8') as file:
+            file.write("timestamp;ID;speed\r\n")
         print("[INFO] video quality: {} {}".format(frame.shape[1], frame.shape[0]))
         trackers = list()
         while self.cap.isOpened():
@@ -233,7 +240,7 @@ class DetectionPeople:
                 else:
                     self.status_tracking(rect, rgb, frame, trackers)
                 objects = centroid_tracker.update(rect)
-                self.object_and_speed(objects, frame)
+                self.object_and_speed(filename_csv, objects, frame)
 
                 info = [
                     ("Number of tracked objects", len(objects)),
