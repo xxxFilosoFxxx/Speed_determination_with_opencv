@@ -115,8 +115,7 @@ class DetectionPeople:
             if self.frame_count % (int(self.skip_frames) * TIME) == 0 or \
                     object_id not in self.centroids.speed:
                 # берем высотку и ширину выделенной фигуры объекта для нахождения скорсоти
-                self.centroids.search_delta_speed(centroid[2], centroid[3],
-                                                  self.skip_frames, object_id)
+                self.centroids.search_delta_speed(centroid[2], self.skip_frames, object_id)
                 self.centroids.save_speed(filename, int(self.frame_count / self.skip_frames),
                                           object_id, self.centroids.speed[object_id])
 
