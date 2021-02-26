@@ -41,7 +41,12 @@ and the shared folder with video for processing:
 
 - ```docker run --rm -v "`pwd`"/data_user:/home/data_user -v "`pwd`"/for_search_speed:/home/for_search_speed -e VIDEO=/home/for_search_speed/video.mp4 speed_detection```
 
-It is also possible to use 2 environment variables:
+A file in the format **output: 'recording time'.avi** will be saved in the ```/data_user``` folder on the host machine.
+
+The file in the format **output: 'recording time'.csv** will also be saved in the ```/data_user``` folder and contains data about the processed video (time stamp; object ID; object speed).
+It was decided to equate its speed to zero when initializing an object.
+
+It is also possible to use 4 environment variables:
  
 - Recognition percentage -> ```PERCENT```
 - Object speed difference -> ```DELTA```
