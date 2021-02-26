@@ -63,9 +63,9 @@ Name                                Stmts   Miss  Cover
 src/detection_frame.py                155      1    99%
 src/idtracker/centroid_tracker.py      63      0   100%
 src/idtracker/trackable_object.py       5      0   100%
-src/search_speed.py                    41      0   100%
+src/search_speed.py                    42      0   100%
 -------------------------------------------------------
-TOTAL                                 264      1    99%
+TOTAL                                 265      1    99%
 ```
 
 For detailed report run:

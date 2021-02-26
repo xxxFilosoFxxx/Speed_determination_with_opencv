@@ -31,20 +31,20 @@ class TestFrame(unittest.TestCase):
         last_centroids = test_class_speed.save_centroids(test_dict)
         self.assertEqual(last_centroids, test_dict)
 
-        width, height = 10, 20  # Возьмем статическую высоту и ширину
+        width = 10  # Возьмем статическую ширину
         fps = 30  # Возьмем статическую частоту кадров
-        test_speed = test_class_speed.search_speed(width, height, fps, 0)
+        test_speed = test_class_speed.search_speed(width, fps, 0)
 
         d_pixels = math.sqrt(math.pow(last_centroids[0][0] - centroids[0][0], 2) +
                              math.pow(last_centroids[0][1] - centroids[0][1], 2))
-        ppm = (height / width) * 1024
+        ppm = (width / 0.5) * 10
         speed = int((d_pixels / ppm) * fps * 3.6)
         self.assertEqual(test_speed, speed)
 
         update_last_centroids = test_class_speed.save_centroids(test_dict)
         self.assertEqual(update_last_centroids, test_dict)
 
-        zero_speed = test_class_speed.search_speed(width, height, fps, 1)
+        zero_speed = test_class_speed.search_speed(width, fps, 1)
         self.assertEqual(zero_speed, 0)
 
     def test_full_search_save(self):
