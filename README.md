@@ -46,6 +46,7 @@ It is also possible to use 2 environment variables:
 - Recognition percentage -> ```PERCENT```
 - Object speed difference -> ```DELTA```
 - Time interval in which the speed is search -> ```TIME```
+- Real object width -> ```WIDTH```
 
 To use these variables when starting ```docker run``` add the parameter ```-e parameter=value```
 
