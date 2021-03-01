@@ -9,7 +9,7 @@ import copy
 import os
 
 # Путь к обрабатываемому видео
-DELTA = os.environ.get('DELTA', 1)
+DELTA = os.environ.get('DELTA', 0)
 # Ширина реального объекта
 WIDTH = os.environ.get('WIDTH', 0.5)
 

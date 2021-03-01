@@ -14,7 +14,7 @@ from src.idtracker.trackable_object import TrackableObject
 from src.search_speed import SearchSpeed
 
 # Путь к обрабатываемому видео
-PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_user/Пример_записи_1080.mp4')
 # процент распознавания
 PERCENT = os.environ.get('PERCENT', 0.2)
 # интервал времени, в котором выполняется поиск скорости
@@ -142,7 +142,9 @@ class DetectionPeople:
         wight = frame.shape[1]
         height = frame.shape[0]
 
-        blob = cv2.dnn.blobFromImage(frame, 0.007843, (wight, height), 127.5)
+        blur = cv2.medianBlur(frame, 3)
+
+        blob = cv2.dnn.blobFromImage(blur, 0.007843, (wight, height), 127.5)
         self.net.setInput(blob)
         out = self.net.forward()
 
@@ -168,7 +170,7 @@ class DetectionPeople:
         обработать видеозафайл
         """
         fps = FPS().start()
-        centroid_tracker = CentroidTracker(max_disappeared=40, max_distance=60)
+        centroid_tracker = CentroidTracker(max_disappeared=50, max_distance=50)
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
             return -1
@@ -211,7 +213,7 @@ class DetectionPeople:
         Функция сохраняет файл после обработки
         """
         fps = FPS().start()
-        centroid_tracker = CentroidTracker(max_disappeared=40, max_distance=60)
+        centroid_tracker = CentroidTracker(max_disappeared=50, max_distance=60)
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
