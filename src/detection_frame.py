@@ -14,7 +14,7 @@ from src.idtracker.trackable_object import TrackableObject
 from src.search_speed import SearchSpeed
 
 # Путь к обрабатываемому видео
-PATH_VIDEO = os.environ.get('VIDEO', 'data_user/Пример_записи_1080.mp4')
+PATH_VIDEO = os.environ.get('VIDEO', 'data_user/видеонаблюдение.mp4')
 # процент распознавания
 PERCENT = os.environ.get('PERCENT', 0.2)
 # интервал времени, в котором выполняется поиск скорости
