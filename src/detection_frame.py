@@ -167,8 +167,9 @@ class DetectionPeople:
     def show_video(self):
         """
         Функция позволяет в реальном времени
-        обработать видеозафайл
+        обработать видеозапись
         """
+        key = True
         fps = FPS().start()
         centroid_tracker = CentroidTracker(max_disappeared=50, max_distance=50)
         if not self.cap.isOpened():
@@ -180,9 +181,15 @@ class DetectionPeople:
         trackers = list()
         while self.cap.isOpened():
             ret, frame = self.cap.read()
-            if ret:
-                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
+            if ret:
+                if key:
+                    cv2.namedWindow("frames", cv2.WINDOW_NORMAL)
+                    cv2.imshow("frames", frame)
+                    cv2.waitKey(-1)
+                    key = False
+
+                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 rect = list()
                 if self.frame_count % int(self.skip_frames) == 0:
                     trackers = list()
@@ -194,8 +201,9 @@ class DetectionPeople:
                 self.object_and_speed(filename_csv, objects, frame)
                 self.frame_count += 1
 
-                cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
-                cv2.imshow("frame", frame)
+                # cv2.namedWindow("frames", cv2.WINDOW_NORMAL)
+                cv2.imshow("frames", frame)
+
                 if cv2.waitKey(1) >= 0:  # Break with ESC
                     break
                 fps.update()
@@ -210,16 +218,16 @@ class DetectionPeople:
 
     def save_frames(self):
         """
-        Функция сохраняет файл после обработки
+        Функция сохраняет видеозапись после обработки
         """
         fps = FPS().start()
         centroid_tracker = CentroidTracker(max_disappeared=50, max_distance=60)
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        fourcc = cv2.VideoWriter_fourcc(*'H264')
         if not self.cap.isOpened():
             print("[INFO] failed to process video")
             return -1
         ret, frame = self.cap.read()
-        filename = 'data_user/output_video: %r.avi' % datetime.now().strftime("%d-%m-%Y %H:%M")
+        filename = 'data_user/output_video: %r.mp4' % datetime.now().strftime("%d-%m-%Y %H:%M")
         filename_csv = 'data_user/output_csv: %r.csv' % datetime.now().strftime("%d-%m-%Y %H:%M")
 
         out_video = cv2.VideoWriter(filename, fourcc, self.skip_frames,
