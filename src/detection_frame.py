@@ -20,6 +20,32 @@ PERCENT = os.environ.get('PERCENT', 0.2)
 # интервал времени, в котором выполняется поиск скорости
 TIME = os.environ.get('TIME', 1)
 
+# глобальные переменные для обработки событий мыши
+PT1 = (0, 0)
+PT2 = (0, 0)
+DRAWING = False
+
+
+def draw_line(event, x, y, flags, param):
+    """
+    Функция обрабатывающая события мыши
+    """
+    global PT1, PT2, DRAWING
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        if not DRAWING:
+            PT1 = (x, y)
+            PT2 = (x, y)
+            DRAWING = True
+        else:
+            PT1 = (0, 0)
+            PT2 = (0, 0)
+            DRAWING = False
+
+    elif event == cv2.EVENT_MOUSEMOVE:
+        if DRAWING:
+            PT2 = (x, y)
+
 
 class DetectionPeople:
     """
@@ -179,15 +205,18 @@ class DetectionPeople:
         with open(filename_csv, mode="w", encoding='utf-8') as file:
             file.write("timestamp;ID;speed\r\n")
         trackers = list()
+
+        cv2.namedWindow("frames", cv2.WINDOW_NORMAL)
+        cv2.setMouseCallback("frames", draw_line)
+
         while self.cap.isOpened():
             ret, frame = self.cap.read()
 
             if ret:
-                if key:
-                    cv2.namedWindow("frames", cv2.WINDOW_NORMAL)
-                    cv2.imshow("frames", frame)
-                    cv2.waitKey(-1)
-                    key = False
+                # if key:
+                #     cv2.imshow("frames", frame)
+                #     cv2.waitKey(-1)
+                #     key = not key
 
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 rect = list()
@@ -201,7 +230,11 @@ class DetectionPeople:
                 self.object_and_speed(filename_csv, objects, frame)
                 self.frame_count += 1
 
-                # cv2.namedWindow("frames", cv2.WINDOW_NORMAL)
+                # TODO:
+
+                if DRAWING:
+                    cv2.line(frame, PT1, PT2, (0, 0, 255), 3)
+
                 cv2.imshow("frames", frame)
 
                 if cv2.waitKey(1) >= 0:  # Break with ESC
