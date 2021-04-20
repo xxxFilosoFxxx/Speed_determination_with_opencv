@@ -23,28 +23,29 @@ TIME = os.environ.get('TIME', 1)
 # глобальные переменные для обработки событий мыши
 PT1 = (0, 0)
 PT2 = (0, 0)
-DRAWING = False
+START_POINT = False
+END_POINT = False
 
 
 def draw_line(event, x, y, flags, param):
     """
     Функция обрабатывающая события мыши
     """
-    global PT1, PT2, DRAWING
+    global PT1, PT2, START_POINT, END_POINT
 
     if event == cv2.EVENT_LBUTTONDOWN:
-        if not DRAWING:
-            PT1 = (x, y)
-            PT2 = (x, y)
-            DRAWING = True
-        else:
+        if START_POINT and END_POINT:
+            START_POINT = False
+            END_POINT = False
             PT1 = (0, 0)
             PT2 = (0, 0)
-            DRAWING = False
 
-    elif event == cv2.EVENT_MOUSEMOVE:
-        if DRAWING:
+        if not START_POINT:
+            PT1 = (x, y)
+            START_POINT = True
+        elif not END_POINT:
             PT2 = (x, y)
+            END_POINT = True
 
 
 class DetectionPeople:
@@ -211,13 +212,18 @@ class DetectionPeople:
 
         while self.cap.isOpened():
             ret, frame = self.cap.read()
+            while ret and key:
+                cv2.imshow("frames", frame)
+                if START_POINT:
+                    cv2.circle(frame, PT1, 3, (0, 0, 255), -1)
+                if START_POINT and END_POINT:
+                    cv2.line(frame, PT1, PT2, (0, 0, 255), 3)
+
+                if cv2.waitKey(1) & 0xFF == ord('c'):
+                    key = False
+                    break
 
             if ret:
-                # if key:
-                #     cv2.imshow("frames", frame)
-                #     cv2.waitKey(-1)
-                #     key = not key
-
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 rect = list()
                 if self.frame_count % int(self.skip_frames) == 0:
@@ -229,11 +235,6 @@ class DetectionPeople:
                 objects = centroid_tracker.update(rect)
                 self.object_and_speed(filename_csv, objects, frame)
                 self.frame_count += 1
-
-                # TODO:
-
-                if DRAWING:
-                    cv2.line(frame, PT1, PT2, (0, 0, 255), 3)
 
                 cv2.imshow("frames", frame)
 
