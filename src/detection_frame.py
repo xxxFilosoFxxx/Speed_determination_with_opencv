@@ -1,4 +1,4 @@
-# pylint: disable=E0401, R0902, R0913, R0914
+# pylint: disable=E0401, R0902, R0913, R0914, C0103, W0613, W0603
 """
 Основной скрипт для распознавания и подсчета скорости объекта
 """
@@ -212,7 +212,6 @@ class DetectionPeople:
 
         while self.cap.isOpened():
             ret, frame = self.cap.read()
-            # TODO: с помощью мыши осуществить локационную привязку местности + определить эталонный метр
             while ret and key:
                 cv2.imshow("frames", frame)
                 if START_POINT:

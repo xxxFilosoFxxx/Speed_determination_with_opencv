@@ -5,4 +5,4 @@ from src.detection_frame import PATH_VIDEO
 if __name__ == '__main__':
     print("[INFO] starting save video...")
     new_video = DetectionPeople(PATH_VIDEO)
-    new_video.show_video()
+    new_video.save_frames()
