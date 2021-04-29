@@ -212,7 +212,7 @@ class DetectionPeople:
 
         while self.cap.isOpened():
             ret, frame = self.cap.read()
-
+            # TODO: с помощью мыши осуществить локационную привязку местности + определить эталонный метр
             while ret and key:
                 cv2.imshow("frames", frame)
                 if START_POINT:

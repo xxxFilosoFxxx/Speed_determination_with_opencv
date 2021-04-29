@@ -55,7 +55,7 @@ class SearchSpeed:
         Returns:
             скорость объекта
         """
-        # TODO:
+        # TODO: по расстоянию Евклида на основе локационной привязки определить скорость объекта
         if i in self.centroids and i in self.last_centroids:
             d_pixels = math.sqrt(math.pow(self.last_centroids[i][0] - self.centroids[i][0], 2) +
                                  math.pow(self.last_centroids[i][1] - self.centroids[i][1], 2))
